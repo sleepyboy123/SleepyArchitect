@@ -10,13 +10,14 @@ import {
   type Edge,
 } from '@xyflow/react'
 import type { ServiceNodeData, SubnetNodeData } from '@/types/game'
-import { INITIAL_NODES, INITIAL_EDGES } from '@/types/game'
+import { INITIAL_NODES, INITIAL_EDGES, getSlotPosition } from '@/types/game'
 
 interface GameStore {
   nodes: Node[]
   edges: Edge[]
   addServiceNode: (node: Node) => void
   removeNode: (nodeId: string) => void
+  moveNodeToSlot: (nodeId: string, newSlotIndex: number) => void
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
   onConnect: (connection: Connection) => void
@@ -75,6 +76,29 @@ export const useGameStore = create<GameStore>()((set, get) => ({
         e => e.source !== nodeId && e.target !== nodeId
       )
       return { nodes: updatedNodes, edges: updatedEdges }
+    })
+  },
+
+  moveNodeToSlot: (nodeId, newSlotIndex) => {
+    set(state => {
+      const node = state.nodes.find(n => n.id === nodeId)
+      if (!node) return state
+      const subnetId = node.parentId
+      const oldSlotIndex = (node.data as ServiceNodeData).slotIndex
+      const newSlotPos = getSlotPosition(newSlotIndex)
+      const updatedNodes = state.nodes.map(n => {
+        if (n.id === nodeId) {
+          return { ...n, position: newSlotPos, data: { ...n.data, slotIndex: newSlotIndex } }
+        }
+        if (n.id === subnetId && oldSlotIndex !== newSlotIndex) {
+          const slots = { ...(n.data as SubnetNodeData).occupiedSlots }
+          delete slots[oldSlotIndex]
+          slots[newSlotIndex] = nodeId
+          return { ...n, data: { ...n.data, occupiedSlots: slots } }
+        }
+        return n
+      })
+      return { nodes: updatedNodes }
     })
   },
 

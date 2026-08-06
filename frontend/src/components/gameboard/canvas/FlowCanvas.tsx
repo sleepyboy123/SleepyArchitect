@@ -16,6 +16,7 @@ import {
   SLOT_HEIGHT,
   getSlotPosition,
   type SubnetNodeData,
+  type ServiceNodeData,
 } from '@/types/game'
 
 function getAbsoluteNodePosition(nodeId: string, allNodes: Node[]): { x: number; y: number } {
@@ -56,6 +57,31 @@ function FlowCanvasInner() {
   const { screenToFlowPosition } = useReactFlow()
   const addServiceNode = useGameStore(s => s.addServiceNode)
   const splitEdge = useGameStore(s => s.splitEdge)
+  const moveNodeToSlot = useGameStore(s => s.moveNodeToSlot)
+
+  const onNodeDragStop = useCallback((_event: React.MouseEvent, node: Node) => {
+    if (node.type !== 'serviceNode') return
+    const allNodes = useGameStore.getState().nodes
+    const subnetNode = allNodes.find(n => n.id === node.parentId)
+    if (!subnetNode) return  // mid-edge node with no subnet - leave it where it landed
+
+    const col = Math.round((node.position.x - SLOT_START_X) / SLOT_WIDTH)
+    const row = Math.round((node.position.y - SLOT_START_Y) / SLOT_HEIGHT)
+    const clampedCol = Math.max(0, Math.min(SLOTS_PER_ROW - 1, col))
+    const clampedRow = Math.max(0, Math.min(1, row))
+    const newSlotIndex = clampedRow * SLOTS_PER_ROW + clampedCol
+
+    const oldSlotIndex = (node.data as ServiceNodeData).slotIndex
+    const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
+
+    // Snap back to original if target slot is occupied by a different node
+    if (newSlotIndex in occupied && occupied[newSlotIndex] !== node.id) {
+      moveNodeToSlot(node.id, oldSlotIndex)
+      return
+    }
+
+    moveNodeToSlot(node.id, newSlotIndex)
+  }, [moveNodeToSlot])
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -88,17 +114,41 @@ function FlowCanvasInner() {
       const dist = distanceToSegment(flowPos, srcAbs, tgtAbs)
 
       if (dist < MID_EDGE_THRESHOLD) {
+        const nodeId = `${serviceType}-${Date.now()}`
+        const subnetNodeIds = ['public-subnet', 'private-subnet']
+        const targetSubnetId = targetNode.parentId
+
+        if (targetSubnetId && subnetNodeIds.includes(targetSubnetId)) {
+          const subnetNode = allNodesSnap.find(n => n.id === targetSubnetId)
+          if (subnetNode) {
+            const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
+            const availableSlot = Array.from({ length: 10 }, (_, i) => i).find(i => !(i in occupied))
+            if (availableSlot !== undefined) {
+              addServiceNode({
+                id: nodeId,
+                type: 'serviceNode',
+                position: getSlotPosition(availableSlot),
+                parentId: targetSubnetId,
+                extent: 'parent',
+                draggable: true,
+                data: { serviceType, label, iconSrc, tooltip, slotIndex: availableSlot },
+              })
+              splitEdge(edge.id, nodeId)
+              return
+            }
+          }
+        }
+
+        // Fallback: geometric midpoint when target has no subnet or subnet is full
         const midX = (srcAbs.x + tgtAbs.x) / 2
         const midY = (srcAbs.y + tgtAbs.y) / 2
-        const nodeId = `${serviceType}-${Date.now()}`
-        const newNode = {
+        addServiceNode({
           id: nodeId,
           type: 'serviceNode',
           position: { x: midX - 30, y: midY - 40 },
-          draggable: false,
+          draggable: true,
           data: { serviceType, label, iconSrc, tooltip, slotIndex: -1 },
-        }
-        addServiceNode(newNode)
+        })
         splitEdge(edge.id, nodeId)
         return
       }
@@ -142,7 +192,7 @@ function FlowCanvasInner() {
           position: slotPos,
           parentId: subnetId,
           extent: 'parent',
-          draggable: false,
+          draggable: true,
           data: { serviceType, label, iconSrc, tooltip, slotIndex },
         })
         return
@@ -157,10 +207,10 @@ function FlowCanvasInner() {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
+      onNodeDragStop={onNodeDragStop}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       defaultEdgeOptions={{ type: 'default' }}
-      nodesDraggable={false}
       panOnDrag={false}
       zoomOnScroll={false}
       zoomOnPinch={false}

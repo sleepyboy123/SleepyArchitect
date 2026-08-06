@@ -26,6 +26,19 @@ function getAbsoluteNodePosition(nodeId: string, allNodes: Node[]): { x: number;
   return { x: parentPos.x + node.position.x, y: parentPos.y + node.position.y }
 }
 
+function distanceToSegment(
+  p: { x: number; y: number },
+  a: { x: number; y: number },
+  b: { x: number; y: number }
+): number {
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const lenSq = dx * dx + dy * dy
+  if (lenSq === 0) return Math.hypot(p.x - a.x, p.y - a.y)
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq))
+  return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy)
+}
+
 const nodeTypes = {
   internetNode: InternetNode,
   igwNode: IgwNode,
@@ -42,6 +55,7 @@ function FlowCanvasInner() {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGameStore()
   const { screenToFlowPosition } = useReactFlow()
   const addServiceNode = useGameStore(s => s.addServiceNode)
+  const splitEdge = useGameStore(s => s.splitEdge)
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -57,6 +71,39 @@ function FlowCanvasInner() {
     if (!serviceType) return
 
     const flowPos = screenToFlowPosition({ x: e.clientX, y: e.clientY })
+
+    // --- Mid-edge insertion check ---
+    const MID_EDGE_THRESHOLD = 60
+    const allEdges = useGameStore.getState().edges
+    const allNodesSnap = useGameStore.getState().nodes
+
+    for (const edge of allEdges) {
+      const sourceNode = allNodesSnap.find(n => n.id === edge.source)
+      const targetNode = allNodesSnap.find(n => n.id === edge.target)
+      if (!sourceNode || !targetNode) continue
+
+      const srcAbs = getAbsoluteNodePosition(edge.source, allNodesSnap)
+      const tgtAbs = getAbsoluteNodePosition(edge.target, allNodesSnap)
+
+      const dist = distanceToSegment(flowPos, srcAbs, tgtAbs)
+
+      if (dist < MID_EDGE_THRESHOLD) {
+        const midX = (srcAbs.x + tgtAbs.x) / 2
+        const midY = (srcAbs.y + tgtAbs.y) / 2
+        const nodeId = `${serviceType}-${Date.now()}`
+        const newNode = {
+          id: nodeId,
+          type: 'serviceNode',
+          position: { x: midX - 30, y: midY - 40 },
+          draggable: false,
+          data: { serviceType, label, iconSrc, tooltip, slotIndex: -1 },
+        }
+        addServiceNode(newNode)
+        splitEdge(edge.id, nodeId)
+        return
+      }
+    }
+    // --- End mid-edge check ---
 
     const allNodes = useGameStore.getState().nodes
     const subnetIds = ['public-subnet', 'private-subnet']
@@ -101,7 +148,7 @@ function FlowCanvasInner() {
         return
       }
     }
-  }, [screenToFlowPosition, addServiceNode])
+  }, [screenToFlowPosition, addServiceNode, splitEdge])
 
   return (
     <ReactFlow

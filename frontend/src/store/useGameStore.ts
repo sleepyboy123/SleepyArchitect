@@ -25,7 +25,7 @@ interface GameStore {
   splitEdge: (edgeId: string, newNodeId: string) => void
 }
 
-export const useGameStore = create<GameStore>()((set, get) => ({
+export const useGameStore = create<GameStore>()((set, _get) => ({
   nodes: INITIAL_NODES,
   edges: INITIAL_EDGES,
 

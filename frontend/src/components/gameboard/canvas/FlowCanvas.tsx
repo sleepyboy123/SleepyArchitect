@@ -168,7 +168,7 @@ function FlowCanvasInner() {
   // Populated via React Flow's official onEdgeMouseEnter/Leave events - no DOM coupling.
   const hoveredEdgeRef = useRef<string | null>(null)
 
-  const onNodeDragStop = useCallback((_event: React.MouseEvent, node: Node) => {
+  const onNodeDragStop = useCallback((_event: MouseEvent | TouchEvent, node: Node) => {
     if (node.type !== 'serviceNode') return
     const allNodes = useGameStore.getState().nodes
     const subnetNode = allNodes.find(n => n.id === node.parentId)

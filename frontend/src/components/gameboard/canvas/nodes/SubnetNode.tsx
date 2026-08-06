@@ -2,7 +2,6 @@ import { useState } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import type { SubnetNodeData } from '@/types/game'
 import {
-  SLOTS_PER_ROW,
   SLOT_WIDTH,
   SLOT_HEIGHT,
   SUBNET_WIDTH,

@@ -15,6 +15,8 @@ import { INITIAL_NODES, INITIAL_EDGES, getSlotPosition } from '@/types/game'
 interface GameStore {
   nodes: Node[]
   edges: Edge[]
+  currentScenarioId: string | null
+  currentTicketIndex: number
   addServiceNode: (node: Node) => void
   removeNode: (nodeId: string) => void
   moveNodeToSlot: (nodeId: string, newSlotIndex: number) => void
@@ -23,11 +25,15 @@ interface GameStore {
   onEdgesChange: (changes: EdgeChange[]) => void
   onConnect: (connection: Connection) => void
   splitEdge: (edgeId: string, newNodeId: string) => void
+  startScenario: (scenarioId: string) => void
+  advanceTicket: () => void
 }
 
 export const useGameStore = create<GameStore>()((set, _get) => ({
   nodes: INITIAL_NODES,
   edges: INITIAL_EDGES,
+  currentScenarioId: null,
+  currentTicketIndex: 0,
 
   addServiceNode: (node) => {
     set(state => {
@@ -118,6 +124,17 @@ export const useGameStore = create<GameStore>()((set, _get) => ({
   },
 
   clearBoard: () => set({ nodes: INITIAL_NODES, edges: INITIAL_EDGES }),
+
+  startScenario: (scenarioId) => set({
+    currentScenarioId: scenarioId,
+    currentTicketIndex: 0,
+    nodes: INITIAL_NODES,
+    edges: INITIAL_EDGES,
+  }),
+
+  advanceTicket: () => set(state => ({
+    currentTicketIndex: state.currentTicketIndex + 1,
+  })),
 
   splitEdge: (edgeId, newNodeId) => {
     set(state => {

@@ -1,10 +1,17 @@
+import { Routes, Route } from 'react-router-dom'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { GameBoard } from '@/components/gameboard/GameBoard'
+import { ScenarioSelectPage } from '@/pages/ScenarioSelectPage'
+import { GameplayPage } from '@/pages/GameplayPage'
+import { AnswerPage } from '@/pages/AnswerPage'
 
 export default function App() {
   return (
     <TooltipProvider delayDuration={300}>
-      <GameBoard />
+      <Routes>
+        <Route path="/" element={<ScenarioSelectPage />} />
+        <Route path="/play/:scenarioId" element={<GameplayPage />} />
+        <Route path="/answer/:scenarioId" element={<AnswerPage />} />
+      </Routes>
     </TooltipProvider>
   )
 }

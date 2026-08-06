@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useGameStore } from '@/store/useGameStore'
 import type { ServiceType } from '@/types/game'
+import { INITIAL_NODES, INITIAL_EDGES } from '@/types/game'
 
 const makeServiceNode = (id: string, serviceType: ServiceType = 'waf') => ({
   id,
@@ -52,5 +53,50 @@ describe('useGameStore', () => {
     expect(edges.find(e => e.id === 'e1')).toBeUndefined()
     expect(edges.find(e => e.source === 'igw' && e.target === 'waf-1')).toBeDefined()
     expect(edges.find(e => e.source === 'waf-1' && e.target === 'ec2-1')).toBeDefined()
+  })
+})
+
+describe('startScenario', () => {
+  beforeEach(() => {
+    useGameStore.setState({
+      currentScenarioId: null,
+      currentTicketIndex: 5,
+      nodes: [],
+      edges: [],
+    })
+  })
+
+  it('sets currentScenarioId', () => {
+    useGameStore.getState().startScenario('sparkling-water')
+    expect(useGameStore.getState().currentScenarioId).toBe('sparkling-water')
+  })
+
+  it('resets currentTicketIndex to 0', () => {
+    useGameStore.getState().startScenario('sparkling-water')
+    expect(useGameStore.getState().currentTicketIndex).toBe(0)
+  })
+
+  it('resets the board to initial nodes and edges', () => {
+    useGameStore.getState().startScenario('sparkling-water')
+    const state = useGameStore.getState()
+    expect(state.nodes).toEqual(INITIAL_NODES)
+    expect(state.edges).toEqual(INITIAL_EDGES)
+  })
+})
+
+describe('advanceTicket', () => {
+  beforeEach(() => {
+    useGameStore.setState({ currentTicketIndex: 0 })
+  })
+
+  it('increments currentTicketIndex by 1', () => {
+    useGameStore.getState().advanceTicket()
+    expect(useGameStore.getState().currentTicketIndex).toBe(1)
+  })
+
+  it('increments again on repeated calls', () => {
+    useGameStore.getState().advanceTicket()
+    useGameStore.getState().advanceTicket()
+    expect(useGameStore.getState().currentTicketIndex).toBe(2)
   })
 })

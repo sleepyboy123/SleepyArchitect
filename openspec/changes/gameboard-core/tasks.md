@@ -1,6 +1,6 @@
 # Gameboard Core Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use the `implementing` skill to execute this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use the `implementing` skill to execute this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build an interactive AWS architecture gameboard - a locked React Flow canvas with a draggable service sidebar, subnet slot grids, user-drawn Bezier edges, mid-edge node insertion, and hover tooltips.
 
@@ -33,7 +33,7 @@
 **Interfaces:**
 - Produces: `ServiceType`, `SidebarItem`, `ServiceNodeData`, `SubnetNodeData`, `getSlotPosition()`, `SIDEBAR_ITEMS`, `useGameStore` with `addServiceNode`, `removeNode`, `onNodesChange`, `onEdgesChange`, `onConnect`, `splitEdge`
 
-- [ ] **Step 1: Prepend the React Flow stylesheet to `frontend/src/index.css`**
+- [x] **Step 1: Prepend the React Flow stylesheet to `frontend/src/index.css`**
 
 Open `frontend/src/index.css`. Add this as the very first line (before any existing content):
 
@@ -41,7 +41,7 @@ Open `frontend/src/index.css`. Add this as the very first line (before any exist
 @import '@xyflow/react/dist/style.css';
 ```
 
-- [ ] **Step 2: Write `frontend/src/types/game.ts`**
+- [x] **Step 2: Write `frontend/src/types/game.ts`**
 
 ```typescript
 import type { Node, Edge } from '@xyflow/react'
@@ -142,7 +142,7 @@ export const INITIAL_EDGES: Edge[] = [
 ]
 ```
 
-- [ ] **Step 3: Write the failing store tests in `frontend/src/store/useGameStore.test.ts`**
+- [x] **Step 3: Write the failing store tests in `frontend/src/store/useGameStore.test.ts`**
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest'
@@ -203,7 +203,7 @@ describe('useGameStore', () => {
 })
 ```
 
-- [ ] **Step 4: Run tests to verify they fail**
+- [x] **Step 4: Run tests to verify they fail**
 
 ```bash
 cd frontend && npx vitest run src/store/useGameStore.test.ts
@@ -211,7 +211,7 @@ cd frontend && npx vitest run src/store/useGameStore.test.ts
 
 Expected: 3 failures - `Cannot find module '@/store/useGameStore'`
 
-- [ ] **Step 5: Write `frontend/src/store/useGameStore.ts`**
+- [x] **Step 5: Write `frontend/src/store/useGameStore.ts`**
 
 ```typescript
 import { create } from 'zustand'
@@ -321,7 +321,7 @@ export const useGameStore = create<GameStore>()((set, get) => ({
 }))
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 ```bash
 cd frontend && npx vitest run src/store/useGameStore.test.ts
@@ -329,7 +329,7 @@ cd frontend && npx vitest run src/store/useGameStore.test.ts
 
 Expected: 3 passing
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 cd frontend && git add src/types/game.ts src/store/useGameStore.ts src/store/useGameStore.test.ts src/index.css
@@ -350,7 +350,7 @@ git commit -m "feat: add game types, Zustand store, and React Flow CSS"
 - Consumes: `SubnetNodeData`, `VpcNodeData` from `@/types/game`; `getSlotPosition`, `SLOTS_PER_ROW` from `@/types/game`
 - Produces: `InternetNode`, `IgwNode`, `VpcNode`, `SubnetNode` - React Flow custom node components registered in `FlowCanvas` in Task 3
 
-- [ ] **Step 1: Create `frontend/src/components/gameboard/canvas/nodes/InternetNode.tsx`**
+- [x] **Step 1: Create `frontend/src/components/gameboard/canvas/nodes/InternetNode.tsx`**
 
 ```typescript
 import { Handle, Position } from '@xyflow/react'
@@ -366,7 +366,7 @@ export function InternetNode() {
 }
 ```
 
-- [ ] **Step 2: Create `frontend/src/components/gameboard/canvas/nodes/IgwNode.tsx`**
+- [x] **Step 2: Create `frontend/src/components/gameboard/canvas/nodes/IgwNode.tsx`**
 
 ```typescript
 import { Handle, Position } from '@xyflow/react'
@@ -383,7 +383,7 @@ export function IgwNode() {
 }
 ```
 
-- [ ] **Step 3: Create `frontend/src/components/gameboard/canvas/nodes/VpcNode.tsx`**
+- [x] **Step 3: Create `frontend/src/components/gameboard/canvas/nodes/VpcNode.tsx`**
 
 `VpcNode` is reused for both the Internet VPC and the Application VPC. It renders a labelled container box; its children (IGW node, subnet nodes) are positioned inside by React Flow's parent/child system.
 
@@ -411,7 +411,7 @@ export function VpcNode({ data, selected }: NodeProps) {
 }
 ```
 
-- [ ] **Step 4: Create `frontend/src/components/gameboard/canvas/nodes/SubnetNode.tsx`**
+- [x] **Step 4: Create `frontend/src/components/gameboard/canvas/nodes/SubnetNode.tsx`**
 
 Each subnet renders a 5x2 grid of 10 numbered slot divs. Occupied slots show nothing (the child `serviceNode` renders on top). Empty slots show a dashed drop-target box. The `isDragOver` CSS class is toggled by a drag state passed via props when the canvas detects a drag-over event.
 
@@ -492,7 +492,7 @@ export function SubnetNode({ data }: NodeProps) {
 }
 ```
 
-- [ ] **Step 5: Verify renderers compile without errors**
+- [x] **Step 5: Verify renderers compile without errors**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -500,7 +500,7 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors (components exist and types match)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd frontend && git add src/components/gameboard/canvas/nodes/
@@ -519,7 +519,7 @@ git commit -m "feat: add structural node renderers (Internet, IGW, VPC, Subnet)"
 - Consumes: `InternetNode`, `IgwNode`, `VpcNode`, `SubnetNode` from Task 2; `useGameStore` from Task 1
 - Produces: `FlowCanvas` component - the locked React Flow wrapper that renders the full structural layout with pre-wired edges. `GameBoard` (Task 6) renders this.
 
-- [ ] **Step 1: Create `frontend/src/components/gameboard/canvas/edges/TrafficEdge.tsx`**
+- [x] **Step 1: Create `frontend/src/components/gameboard/canvas/edges/TrafficEdge.tsx`**
 
 The traffic edge is an animated dashed Bezier curve used only on the Internet → IGW pre-wired connection.
 
@@ -556,7 +556,7 @@ Then add the keyframe animation to `frontend/src/index.css` (append after existi
 }
 ```
 
-- [ ] **Step 2: Create `frontend/src/components/gameboard/canvas/FlowCanvas.tsx`**
+- [x] **Step 2: Create `frontend/src/components/gameboard/canvas/FlowCanvas.tsx`**
 
 The canvas renders the full structural layout. The viewport is locked. Custom node/edge types are registered here. `ReactFlowProvider` wraps the inner component so hooks like `useReactFlow` can be used inside.
 
@@ -620,7 +620,7 @@ export function FlowCanvas() {
 }
 ```
 
-- [ ] **Step 3: Verify the canvas compiles**
+- [x] **Step 3: Verify the canvas compiles**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -628,7 +628,7 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd frontend && git add src/components/gameboard/canvas/
@@ -646,7 +646,7 @@ git commit -m "feat: add FlowCanvas with structural layout and animated traffic 
 - Consumes: `ServiceNodeData` from `@/types/game`; `useGameStore` (for `removeNode`); `Tooltip`, `TooltipTrigger`, `TooltipContent` from `@/components/ui/tooltip`; `X` from `lucide-react`
 - Produces: `ServiceNode` component registered in `FlowCanvas`'s `nodeTypes` map (Task 3 must be updated to include `serviceNode: ServiceNode`)
 
-- [ ] **Step 1: Create `frontend/src/components/gameboard/canvas/nodes/ServiceNode.tsx`**
+- [x] **Step 1: Create `frontend/src/components/gameboard/canvas/nodes/ServiceNode.tsx`**
 
 ASG gets two labeled output handles (`to-frontend` and `to-backend`). All other nodes get a single top target handle and a single bottom source handle plus left/right handles.
 
@@ -726,7 +726,7 @@ export function ServiceNode({ id, data, selected }: NodeProps) {
 }
 ```
 
-- [ ] **Step 2: Register `ServiceNode` in `FlowCanvas.tsx`**
+- [x] **Step 2: Register `ServiceNode` in `FlowCanvas.tsx`**
 
 Open `frontend/src/components/gameboard/canvas/FlowCanvas.tsx`.
 
@@ -746,7 +746,7 @@ const nodeTypes = {
 }
 ```
 
-- [ ] **Step 3: Verify types compile**
+- [x] **Step 3: Verify types compile**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -754,7 +754,7 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd frontend && git add src/components/gameboard/canvas/nodes/ServiceNode.tsx src/components/gameboard/canvas/FlowCanvas.tsx
@@ -773,7 +773,7 @@ git commit -m "feat: add ServiceNode renderer with tooltip, delete button, and A
 - Consumes: `SidebarItem`, `SIDEBAR_ITEMS` from `@/types/game`
 - Produces: `Sidebar` component consumed by `GameBoard` in Task 6. Drag payload set on `dataTransfer` must use the key `serviceType` with the `ServiceType` string as value - `FlowCanvas` reads this key in Task 7.
 
-- [ ] **Step 1: Create `frontend/src/components/gameboard/SidebarItem.tsx`**
+- [x] **Step 1: Create `frontend/src/components/gameboard/SidebarItem.tsx`**
 
 On drag start, the service type and icon source are written to `dataTransfer` so `FlowCanvas` can read them on drop.
 
@@ -814,7 +814,7 @@ export function SidebarItemTile({ item }: SidebarItemProps) {
 }
 ```
 
-- [ ] **Step 2: Create `frontend/src/components/gameboard/Sidebar.tsx`**
+- [x] **Step 2: Create `frontend/src/components/gameboard/Sidebar.tsx`**
 
 The sidebar is collapsible. When collapsed it shows only a chevron button; when expanded it shows the full icon grid. Width transitions are handled by Tailwind `transition-all`.
 
@@ -859,7 +859,7 @@ export function Sidebar() {
 }
 ```
 
-- [ ] **Step 3: Verify types compile**
+- [x] **Step 3: Verify types compile**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -867,7 +867,7 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd frontend && git add src/components/gameboard/SidebarItem.tsx src/components/gameboard/Sidebar.tsx
@@ -886,7 +886,7 @@ git commit -m "feat: add collapsible sidebar with draggable AWS service tiles"
 - Consumes: `Sidebar` from Task 5; `FlowCanvas` from Task 3
 - Produces: `GameBoard` - the root component mounted by `App`. After this task the app renders the full layout at `http://localhost:3003`.
 
-- [ ] **Step 1: Create `frontend/src/components/gameboard/GameBoard.tsx`**
+- [x] **Step 1: Create `frontend/src/components/gameboard/GameBoard.tsx`**
 
 ```typescript
 import { Sidebar } from './Sidebar'
@@ -904,7 +904,7 @@ export function GameBoard() {
 }
 ```
 
-- [ ] **Step 2: Modify `frontend/src/App.tsx`**
+- [x] **Step 2: Modify `frontend/src/App.tsx`**
 
 Replace the file's entire content with:
 
@@ -921,7 +921,7 @@ export default function App() {
 }
 ```
 
-- [ ] **Step 3: Start the dev server and verify the layout renders**
+- [x] **Step 3: Start the dev server and verify the layout renders**
 
 ```bash
 cd frontend && npm run dev
@@ -937,7 +937,7 @@ Open `http://localhost:3003`. You should see:
 
 If the canvas is blank, check the browser console for React Flow warnings about missing parent node dimensions or stylesheet.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd frontend && git add src/components/gameboard/GameBoard.tsx src/App.tsx
@@ -957,7 +957,7 @@ git commit -m "feat: wire GameBoard root and TooltipProvider into App"
 
 Note: `useReactFlow` is only callable inside a `ReactFlowProvider` tree. `FlowCanvasInner` is already inside `ReactFlowProvider` (via the `FlowCanvas` wrapper), so `useReactFlow` can be called in `FlowCanvasInner`.
 
-- [ ] **Step 1: Add the drop handler helpers to `FlowCanvas.tsx`**
+- [x] **Step 1: Add the drop handler helpers to `FlowCanvas.tsx`**
 
 First, add these imports to the top of `FlowCanvas.tsx` (alongside the existing imports):
 
@@ -989,7 +989,7 @@ function getAbsoluteNodePosition(nodeId: string, allNodes: Node[]): { x: number;
 }
 ```
 
-- [ ] **Step 2: Add `onDragOver` and `onDrop` to `FlowCanvasInner`**
+- [x] **Step 2: Add `onDragOver` and `onDrop` to `FlowCanvasInner`**
 
 Add the following inside `FlowCanvasInner`, after the `useGameStore` call:
 
@@ -1059,7 +1059,7 @@ const onDrop = useCallback((e: React.DragEvent) => {
 }, [screenToFlowPosition, addServiceNode])
 ```
 
-- [ ] **Step 3: Wire `onDragOver` and `onDrop` into the `<ReactFlow>` component**
+- [x] **Step 3: Wire `onDragOver` and `onDrop` into the `<ReactFlow>` component**
 
 In `FlowCanvasInner`, add these two props to the `<ReactFlow>` element:
 
@@ -1068,13 +1068,13 @@ onDragOver={onDragOver}
 onDrop={onDrop}
 ```
 
-- [ ] **Step 4: Manually verify placement in the browser**
+- [x] **Step 4: Manually verify placement in the browser**
 
 Start the dev server if not running (`cd frontend && npm run dev`). Drag "WAF" from the sidebar and hover over the Public Subnet. The slot grid divs should highlight when hovered. Drop it on an empty slot. A WAF service node should appear at that slot inside the Public Subnet.
 
 Drag a second service to confirm a different slot fills correctly. Attempt to drop on an occupied slot - it should silently reject the drop.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd frontend && git add src/components/gameboard/canvas/FlowCanvas.tsx
@@ -1092,7 +1092,7 @@ git commit -m "feat: implement drag-from-sidebar drop-to-subnet-slot placement"
 - Consumes: `onConnect`, `splitEdge` from `useGameStore`; `useReactFlow` from `@xyflow/react`
 - Produces: Users can drag from any node handle to another to draw a Bezier edge. Dropping a sidebar item near the midpoint of an existing edge splits that edge and routes it through the new node.
 
-- [ ] **Step 1: Add mid-edge detection helper to `FlowCanvas.tsx`**
+- [x] **Step 1: Add mid-edge detection helper to `FlowCanvas.tsx`**
 
 Add this helper at module level after `getAbsoluteNodePosition`:
 
@@ -1111,7 +1111,7 @@ function distanceToSegment(
 }
 ```
 
-- [ ] **Step 2: Extend the `onDrop` handler in `FlowCanvasInner` to detect mid-edge drops**
+- [x] **Step 2: Extend the `onDrop` handler in `FlowCanvasInner` to detect mid-edge drops**
 
 Add `splitEdge` to the `useGameStore` selector in `FlowCanvasInner` (alongside the existing `addServiceNode` line from Task 7):
 ```typescript
@@ -1158,7 +1158,7 @@ for (const edge of allEdges) {
 
 Note: nodes inserted mid-edge are not slotted into a subnet (they sit on the canvas at the edge midpoint). Their `slotIndex` is `-1` to signal no slot ownership. The `addServiceNode` store function handles this: when `slotIndex === -1`, it skips the subnet slot update.
 
-- [ ] **Step 3: Guard `addServiceNode` in the store against `slotIndex === -1`**
+- [x] **Step 3: Guard `addServiceNode` in the store against `slotIndex === -1`**
 
 Open `frontend/src/store/useGameStore.ts`. In the `addServiceNode` mutator, wrap the slot-update map with a guard:
 
@@ -1191,7 +1191,7 @@ addServiceNode: (node) => {
 },
 ```
 
-- [ ] **Step 4: Verify edge connection by running the dev server**
+- [x] **Step 4: Verify edge connection by running the dev server**
 
 ```bash
 cd frontend && npm run dev
@@ -1202,7 +1202,7 @@ cd frontend && npm run dev
 3. Drag from that handle to the second node - a Bezier edge should connect them.
 4. Drag a third service (e.g. WAF) from the sidebar and drop it approximately on the midpoint of that edge. The edge should disappear and two new edges should appear routing through the WAF node.
 
-- [ ] **Step 5: Run the full test suite to confirm no regressions**
+- [x] **Step 5: Run the full test suite to confirm no regressions**
 
 ```bash
 cd frontend && npx vitest run
@@ -1210,7 +1210,7 @@ cd frontend && npx vitest run
 
 Expected: all 3 store tests pass
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd frontend && git add src/components/gameboard/canvas/FlowCanvas.tsx src/store/useGameStore.ts

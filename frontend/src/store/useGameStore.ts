@@ -18,6 +18,7 @@ interface GameStore {
   addServiceNode: (node: Node) => void
   removeNode: (nodeId: string) => void
   moveNodeToSlot: (nodeId: string, newSlotIndex: number) => void
+  clearBoard: () => void
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
   onConnect: (connection: Connection) => void
@@ -115,6 +116,8 @@ export const useGameStore = create<GameStore>()((set, get) => ({
       edges: addEdge({ ...connection, type: 'default' }, state.edges),
     }))
   },
+
+  clearBoard: () => set({ nodes: INITIAL_NODES, edges: INITIAL_EDGES }),
 
   splitEdge: (edgeId, newNodeId) => {
     set(state => {

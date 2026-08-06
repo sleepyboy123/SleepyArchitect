@@ -1,6 +1,6 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { ReactFlow, ReactFlowProvider, Background, useReactFlow } from '@xyflow/react'
-import type { Node } from '@xyflow/react'
+import type { Node, Edge } from '@xyflow/react'
 import { useGameStore } from '@/store/useGameStore'
 import { InternetNode } from './nodes/InternetNode'
 import { IgwNode } from './nodes/IgwNode'
@@ -14,11 +14,18 @@ import {
   SLOTS_PER_ROW,
   SLOT_WIDTH,
   SLOT_HEIGHT,
+  SUBNET_WIDTH,
+  SUBNET_HEIGHT,
+  SIDEBAR_ITEMS,
   getSlotPosition,
   type SubnetNodeData,
   type ServiceNodeData,
 } from '@/types/game'
 
+const VALID_SERVICE_TYPES = new Set(SIDEBAR_ITEMS.map(i => i.serviceType))
+const SUBNET_IDS = ['public-subnet', 'private-subnet']
+
+// Still needed for the geometric midpoint fallback (non-subnet edges)
 function getAbsoluteNodePosition(nodeId: string, allNodes: Node[]): { x: number; y: number } {
   const node = allNodes.find(n => n.id === nodeId)
   if (!node) return { x: 0, y: 0 }
@@ -27,17 +34,115 @@ function getAbsoluteNodePosition(nodeId: string, allNodes: Node[]): { x: number;
   return { x: parentPos.x + node.position.x, y: parentPos.y + node.position.y }
 }
 
-function distanceToSegment(
-  p: { x: number; y: number },
-  a: { x: number; y: number },
-  b: { x: number; y: number }
-): number {
-  const dx = b.x - a.x
-  const dy = b.y - a.y
-  const lenSq = dx * dx + dy * dy
-  if (lenSq === 0) return Math.hypot(p.x - a.x, p.y - a.y)
-  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq))
-  return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy)
+interface DragPayload {
+  serviceType: ServiceNodeData['serviceType']
+  iconSrc: string
+  label: string
+  tooltip: string
+}
+
+function extractDragPayload(e: React.DragEvent): DragPayload | null {
+  const serviceType = e.dataTransfer.getData('serviceType')
+  const iconSrc = e.dataTransfer.getData('iconSrc')
+  const label = e.dataTransfer.getData('label')
+  const tooltip = e.dataTransfer.getData('tooltip')
+  if (
+    !serviceType ||
+    !VALID_SERVICE_TYPES.has(serviceType as ServiceNodeData['serviceType']) ||
+    !iconSrc.startsWith('/aws-icons/')
+  ) return null
+  return { serviceType: serviceType as ServiceNodeData['serviceType'], iconSrc, label, tooltip }
+}
+
+interface MidEdgeResult {
+  insertSlot: number
+  slotsToShift: Array<{ nodeId: string; to: number }>
+}
+
+function resolveMidEdgeInsertion(
+  edge: Edge,
+  allNodes: Node[],
+  occupied: Record<number, string>,
+): MidEdgeResult | null {
+  const targetNode = allNodes.find(n => n.id === edge.target)
+  if (!targetNode) return null
+
+  const targetData = targetNode.data as ServiceNodeData
+  const targetSlot = typeof targetData.slotIndex === 'number' ? targetData.slotIndex : -1
+
+  let insertSlot = -1
+  const slotsToShift: Array<{ nodeId: string; to: number }> = []
+
+  if (targetSlot >= 0) {
+    const targetRow = Math.floor(targetSlot / SLOTS_PER_ROW)
+    const targetCol = targetSlot % SLOTS_PER_ROW
+    const slotBefore = targetCol > 0 ? targetRow * SLOTS_PER_ROW + (targetCol - 1) : -1
+
+    if (slotBefore >= 0 && !(slotBefore in occupied)) {
+      // Free slot immediately before target - use it, no shift needed
+      insertSlot = slotBefore
+    } else {
+      // Cascade push: find first free slot to the right in the same row
+      const rowEnd = targetRow * SLOTS_PER_ROW + (SLOTS_PER_ROW - 1)
+      let freeSlot = -1
+      for (let s = targetSlot + 1; s <= rowEnd; s++) {
+        if (!(s in occupied)) { freeSlot = s; break }
+      }
+      if (freeSlot >= 0) {
+        // Build shift list right-to-left so each move doesn't clobber the next
+        for (let s = freeSlot - 1; s >= targetSlot; s--) {
+          if (s in occupied) slotsToShift.push({ nodeId: occupied[s], to: s + 1 })
+        }
+        insertSlot = targetSlot
+      }
+    }
+  }
+
+  // Fallback: targetSlot unknown, or entire row was full - try any free slot
+  if (insertSlot < 0) {
+    insertSlot = Array.from({ length: 10 }, (_, i) => i).find(i => !(i in occupied)) ?? -1
+  }
+
+  if (insertSlot < 0) return null
+  return { insertSlot, slotsToShift }
+}
+
+interface SubnetDropResult {
+  subnetId: string
+  slotIndex: number
+}
+
+function resolveSubnetDrop(
+  flowPos: { x: number; y: number },
+  allNodes: Node[],
+): SubnetDropResult | null {
+  for (const subnetId of SUBNET_IDS) {
+    const subnetNode = allNodes.find(n => n.id === subnetId)
+    if (!subnetNode) continue
+
+    const absPos = getAbsoluteNodePosition(subnetId, allNodes)
+
+    if (
+      flowPos.x >= absPos.x &&
+      flowPos.x <= absPos.x + SUBNET_WIDTH &&
+      flowPos.y >= absPos.y &&
+      flowPos.y <= absPos.y + SUBNET_HEIGHT
+    ) {
+      const relX = flowPos.x - absPos.x
+      const relY = flowPos.y - absPos.y
+      const col = Math.floor((relX - SLOT_START_X) / SLOT_WIDTH)
+      const row = Math.floor((relY - SLOT_START_Y) / SLOT_HEIGHT)
+
+      if (col < 0 || col >= SLOTS_PER_ROW || row < 0 || row > 1) return null
+
+      const slotIndex = row * SLOTS_PER_ROW + col
+      const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
+      if (slotIndex in occupied) return null
+
+      return { subnetId, slotIndex }
+    }
+  }
+  return null
 }
 
 const nodeTypes = {
@@ -59,11 +164,15 @@ function FlowCanvasInner() {
   const splitEdge = useGameStore(s => s.splitEdge)
   const moveNodeToSlot = useGameStore(s => s.moveNodeToSlot)
 
+  // Tracks which React Flow edge (by id) the cursor is directly over during a drag.
+  // Populated via React Flow's official onEdgeMouseEnter/Leave events - no DOM coupling.
+  const hoveredEdgeRef = useRef<string | null>(null)
+
   const onNodeDragStop = useCallback((_event: React.MouseEvent, node: Node) => {
     if (node.type !== 'serviceNode') return
     const allNodes = useGameStore.getState().nodes
     const subnetNode = allNodes.find(n => n.id === node.parentId)
-    if (!subnetNode) return  // mid-edge node with no subnet - leave it where it landed
+    if (!subnetNode) return
 
     const col = Math.round((node.position.x - SLOT_START_X) / SLOT_WIDTH)
     const row = Math.round((node.position.y - SLOT_START_Y) / SLOT_HEIGHT)
@@ -74,7 +183,6 @@ function FlowCanvasInner() {
     const oldSlotIndex = (node.data as ServiceNodeData).slotIndex
     const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
 
-    // Snap back to original if target slot is occupied by a different node
     if (newSlotIndex in occupied && occupied[newSlotIndex] !== node.id) {
       moveNodeToSlot(node.id, oldSlotIndex)
       return
@@ -83,6 +191,14 @@ function FlowCanvasInner() {
     moveNodeToSlot(node.id, newSlotIndex)
   }, [moveNodeToSlot])
 
+  const onEdgeMouseEnter = useCallback((_: React.MouseEvent, edge: Edge) => {
+    hoveredEdgeRef.current = edge.id
+  }, [])
+
+  const onEdgeMouseLeave = useCallback(() => {
+    hoveredEdgeRef.current = null
+  }, [])
+
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'copy'
@@ -90,62 +206,42 @@ function FlowCanvasInner() {
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-    const serviceType = e.dataTransfer.getData('serviceType')
-    const iconSrc = e.dataTransfer.getData('iconSrc')
-    const label = e.dataTransfer.getData('label')
-    const tooltip = e.dataTransfer.getData('tooltip')
-    if (!serviceType) return
+    const payload = extractDragPayload(e)
+    if (!payload) return
+    const { serviceType, iconSrc, label, tooltip } = payload
 
     const flowPos = screenToFlowPosition({ x: e.clientX, y: e.clientY })
+    const nodeId = `${serviceType}-${Date.now()}`
+    const allNodes = useGameStore.getState().nodes
 
-    // --- Mid-edge insertion check ---
-    const MID_EDGE_THRESHOLD = 60
-    const allEdges = useGameStore.getState().edges
-    const allNodesSnap = useGameStore.getState().nodes
-
-    for (const edge of allEdges) {
-      const sourceNode = allNodesSnap.find(n => n.id === edge.source)
-      const targetNode = allNodesSnap.find(n => n.id === edge.target)
-      if (!sourceNode || !targetNode) continue
-
-      const srcAbs = getAbsoluteNodePosition(edge.source, allNodesSnap)
-      const tgtAbs = getAbsoluteNodePosition(edge.target, allNodesSnap)
-
-      const dist = distanceToSegment(flowPos, srcAbs, tgtAbs)
-
-      if (dist < MID_EDGE_THRESHOLD) {
-        const nodeId = `${serviceType}-${Date.now()}`
-        const subnetNodeIds = ['public-subnet', 'private-subnet']
-        const targetSubnetId = targetNode.parentId
-
-        if (targetSubnetId && subnetNodeIds.includes(targetSubnetId)) {
-          const subnetNode = allNodesSnap.find(n => n.id === targetSubnetId)
-          if (subnetNode) {
-            const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
-            const availableSlot = Array.from({ length: 10 }, (_, i) => i).find(i => !(i in occupied))
-            if (availableSlot !== undefined) {
-              addServiceNode({
-                id: nodeId,
-                type: 'serviceNode',
-                position: getSlotPosition(availableSlot),
-                parentId: targetSubnetId,
-                extent: 'parent',
-                draggable: true,
-                data: { serviceType, label, iconSrc, tooltip, slotIndex: availableSlot },
-              })
-              splitEdge(edge.id, nodeId)
-              return
-            }
+    // --- Mid-edge insertion ---
+    const hoveredEdgeId = hoveredEdgeRef.current
+    if (hoveredEdgeId) {
+      const edge = useGameStore.getState().edges.find(ed => ed.id === hoveredEdgeId)
+      if (edge) {
+        const targetNode = allNodes.find(n => n.id === edge.target)
+        if (targetNode?.parentId && SUBNET_IDS.includes(targetNode.parentId)) {
+          const subnetNode = allNodes.find(n => n.id === targetNode.parentId)!
+          const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
+          const result = resolveMidEdgeInsertion(edge, allNodes, occupied)
+          if (result) {
+            for (const shift of result.slotsToShift) moveNodeToSlot(shift.nodeId, shift.to)
+            addServiceNode({
+              id: nodeId, type: 'serviceNode',
+              position: getSlotPosition(result.insertSlot),
+              parentId: targetNode.parentId, extent: 'parent', draggable: true,
+              data: { serviceType, label, iconSrc, tooltip, slotIndex: result.insertSlot },
+            })
+            splitEdge(edge.id, nodeId)
+            return
           }
         }
-
-        // Fallback: geometric midpoint when target has no subnet or subnet is full
-        const midX = (srcAbs.x + tgtAbs.x) / 2
-        const midY = (srcAbs.y + tgtAbs.y) / 2
+        // Geometric midpoint fallback (target not in subnet, or subnet full)
+        const srcAbs = getAbsoluteNodePosition(edge.source, allNodes)
+        const tgtAbs = getAbsoluteNodePosition(edge.target, allNodes)
         addServiceNode({
-          id: nodeId,
-          type: 'serviceNode',
-          position: { x: midX - 30, y: midY - 40 },
+          id: nodeId, type: 'serviceNode',
+          position: { x: (srcAbs.x + tgtAbs.x) / 2 - 30, y: (srcAbs.y + tgtAbs.y) / 2 - 40 },
           draggable: true,
           data: { serviceType, label, iconSrc, tooltip, slotIndex: -1 },
         })
@@ -153,52 +249,18 @@ function FlowCanvasInner() {
         return
       }
     }
-    // --- End mid-edge check ---
 
-    const allNodes = useGameStore.getState().nodes
-    const subnetIds = ['public-subnet', 'private-subnet']
-
-    for (const subnetId of subnetIds) {
-      const subnetNode = allNodes.find(n => n.id === subnetId)
-      if (!subnetNode) continue
-
-      const absPos = getAbsoluteNodePosition(subnetId, allNodes)
-      const subnetW = SLOT_START_X * 2 + SLOTS_PER_ROW * SLOT_WIDTH
-      const subnetH = SLOT_START_Y + 2 * SLOT_HEIGHT + 20
-
-      if (
-        flowPos.x >= absPos.x &&
-        flowPos.x <= absPos.x + subnetW &&
-        flowPos.y >= absPos.y &&
-        flowPos.y <= absPos.y + subnetH
-      ) {
-        const relX = flowPos.x - absPos.x
-        const relY = flowPos.y - absPos.y
-        const col = Math.floor((relX - SLOT_START_X) / SLOT_WIDTH)
-        const row = Math.floor((relY - SLOT_START_Y) / SLOT_HEIGHT)
-
-        if (col < 0 || col >= SLOTS_PER_ROW || row < 0 || row > 1) return
-
-        const slotIndex = row * SLOTS_PER_ROW + col
-        const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
-        if (slotIndex in occupied) return
-
-        const slotPos = getSlotPosition(slotIndex)
-        const nodeId = `${serviceType}-${Date.now()}`
-
-        addServiceNode({
-          id: nodeId,
-          type: 'serviceNode',
-          position: slotPos,
-          parentId: subnetId,
-          extent: 'parent',
-          draggable: true,
-          data: { serviceType, label, iconSrc, tooltip, slotIndex },
-        })
-        return
-      }
+    // --- Plain subnet drop ---
+    const subnetDrop = resolveSubnetDrop(flowPos, allNodes)
+    if (subnetDrop) {
+      addServiceNode({
+        id: nodeId, type: 'serviceNode',
+        position: getSlotPosition(subnetDrop.slotIndex),
+        parentId: subnetDrop.subnetId, extent: 'parent', draggable: true,
+        data: { serviceType, label, iconSrc, tooltip, slotIndex: subnetDrop.slotIndex },
+      })
     }
-  }, [screenToFlowPosition, addServiceNode, splitEdge])
+  }, [screenToFlowPosition, addServiceNode, splitEdge, moveNodeToSlot])
 
   return (
     <ReactFlow
@@ -208,6 +270,8 @@ function FlowCanvasInner() {
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       onNodeDragStop={onNodeDragStop}
+      onEdgeMouseEnter={onEdgeMouseEnter}
+      onEdgeMouseLeave={onEdgeMouseLeave}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       defaultEdgeOptions={{ type: 'default' }}

@@ -5,8 +5,8 @@ import {
   SLOTS_PER_ROW,
   SLOT_WIDTH,
   SLOT_HEIGHT,
-  SLOT_START_X,
-  SLOT_START_Y,
+  SUBNET_WIDTH,
+  SUBNET_HEIGHT,
   getSlotPosition,
 } from '@/types/game'
 import { cn } from '@/lib/utils'
@@ -17,16 +17,13 @@ export function SubnetNode({ data }: NodeProps) {
   const { label, subnetType, occupiedSlots } = data as SubnetNodeData
   const [hoveredSlot, setHoveredSlot] = useState<number | null>(null)
 
-  const subnetWidth = SLOT_START_X * 2 + SLOTS_PER_ROW * SLOT_WIDTH
-  const subnetHeight = SLOT_START_Y + 2 * SLOT_HEIGHT + 20
-
   return (
     <div
       className={cn(
         'rounded-md border-2 border-dashed relative',
         subnetType === 'public' ? 'border-green-500/60 bg-green-50/30 dark:bg-green-950/20' : 'border-blue-500/60 bg-blue-50/30 dark:bg-blue-950/20'
       )}
-      style={{ width: subnetWidth, height: subnetHeight }}
+      style={{ width: SUBNET_WIDTH, height: SUBNET_HEIGHT }}
     >
       <div className="flex items-center gap-1 px-2 py-1">
         <img

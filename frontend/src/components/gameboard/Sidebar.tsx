@@ -8,7 +8,8 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <div
+    <aside
+      aria-label="AWS Services"
       className={cn(
         'relative flex flex-col h-full border-r border-border bg-card transition-all duration-200',
         collapsed ? 'w-8' : 'w-40'
@@ -33,6 +34,6 @@ export function Sidebar() {
           ))}
         </div>
       )}
-    </div>
+    </aside>
   )
 }

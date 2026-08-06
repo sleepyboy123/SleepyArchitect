@@ -191,17 +191,19 @@ function FlowCanvasInner() {
     moveNodeToSlot(node.id, newSlotIndex)
   }, [moveNodeToSlot])
 
-  const onEdgeMouseEnter = useCallback((_: React.MouseEvent, edge: Edge) => {
-    hoveredEdgeRef.current = edge.id
-  }, [])
-
-  const onEdgeMouseLeave = useCallback(() => {
-    hoveredEdgeRef.current = null
-  }, [])
-
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'copy'
+
+    // Walk up from the element under the cursor to find a React Flow edge group.
+    // React Flow renders edge groups as <g class="react-flow__edge" data-id="...">
+    // with a wide transparent interaction path, so this is a reliable hit area.
+    // NOTE: onEdgeMouseEnter/Leave cannot be used here - they don't fire during HTML drags.
+    let el = document.elementFromPoint(e.clientX, e.clientY)
+    while (el && !el.classList.contains('react-flow__edge')) {
+      el = el.parentElement
+    }
+    hoveredEdgeRef.current = el?.getAttribute('data-id') ?? null
   }, [])
 
   const onDrop = useCallback((e: React.DragEvent) => {
@@ -270,8 +272,6 @@ function FlowCanvasInner() {
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       onNodeDragStop={onNodeDragStop}
-      onEdgeMouseEnter={onEdgeMouseEnter}
-      onEdgeMouseLeave={onEdgeMouseLeave}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       defaultEdgeOptions={{ type: 'default' }}

@@ -76,3 +76,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes traffic-flow {
+  from { stroke-dashoffset: 18; }
+  to   { stroke-dashoffset: 0; }
+}

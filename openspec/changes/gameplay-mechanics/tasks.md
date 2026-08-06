@@ -1,6 +1,6 @@
 # Gameplay Mechanics Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use the `implementing` skill to execute this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use the `implementing` skill to execute this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Add the full gameplay loop - scenario selection, cumulative ticket-based validation, 2-second traffic animation on submit, and a result modal with optional objectives - layered on top of the existing React Flow gameboard.
 
@@ -37,7 +37,7 @@
 - Produces: `submitDesign(scenarioId, ticketIndex, nodes, edges): ValidationResult` pure function (used by Task 4)
 - Produces: graph helpers `getNodesOfType`, `getNodesInSubnet`, `hasEdgeBetween`, `hasPathBetween`, `isReachableFromIgw` in `validation/utils.ts`
 
-- [ ] **Step 1.1: Write `frontend/src/types/scenario.ts`**
+- [x] **Step 1.1: Write `frontend/src/types/scenario.ts`**
 
 ```ts
 import type { Node, Edge } from '@xyflow/react'
@@ -69,7 +69,7 @@ export interface ValidationResult {
 }
 ```
 
-- [ ] **Step 1.2: Write `frontend/src/scenarios/sparkling-water/validation/utils.ts`**
+- [x] **Step 1.2: Write `frontend/src/scenarios/sparkling-water/validation/utils.ts`**
 
 ```ts
 import type { Node, Edge } from '@xyflow/react'
@@ -113,7 +113,7 @@ export function isReachableFromIgw(nodes: Node[], edges: Edge[], targetId: strin
 }
 ```
 
-- [ ] **Step 1.3: Write `frontend/src/scenarios/sparkling-water/validation/utils.test.ts`**
+- [x] **Step 1.3: Write `frontend/src/scenarios/sparkling-water/validation/utils.test.ts`**
 
 ```ts
 import { describe, it, expect } from 'vitest'
@@ -199,7 +199,7 @@ describe('isReachableFromIgw', () => {
 })
 ```
 
-- [ ] **Step 1.4: Run the tests and verify they pass**
+- [x] **Step 1.4: Run the tests and verify they pass**
 
 ```bash
 cd frontend && npx vitest run src/scenarios/sparkling-water/validation/utils.test.ts
@@ -207,7 +207,7 @@ cd frontend && npx vitest run src/scenarios/sparkling-water/validation/utils.tes
 
 Expected: all tests PASS.
 
-- [ ] **Step 1.5: Write `frontend/src/scenarios/sparkling-water/tickets.ts`**
+- [x] **Step 1.5: Write `frontend/src/scenarios/sparkling-water/tickets.ts`**
 
 ```ts
 import type { Ticket } from '@/types/scenario'
@@ -354,7 +354,7 @@ export const tickets: Ticket[] = [
 ]
 ```
 
-- [ ] **Step 1.6: Write `frontend/src/scenarios/sparkling-water/answer.ts`**
+- [x] **Step 1.6: Write `frontend/src/scenarios/sparkling-water/answer.ts`**
 
 Note: `getSlotPosition` is imported from `@/types/game`. Slot 0 = top-left of each subnet. The `occupiedSlots` on the subnet nodes must match the answer service nodes so the slot grid renders correctly on the answer page.
 
@@ -420,7 +420,7 @@ export const ANSWER_NODES: Node[] = [
 export const ANSWER_EDGES: Edge[] = [...INITIAL_EDGES, ...SERVICE_EDGES]
 ```
 
-- [ ] **Step 1.7: Write `frontend/src/scenarios/sparkling-water/index.ts`**
+- [x] **Step 1.7: Write `frontend/src/scenarios/sparkling-water/index.ts`**
 
 ```ts
 import type { ScenarioDefinition } from '@/types/scenario'
@@ -437,7 +437,7 @@ export const sparklingWater: ScenarioDefinition = {
 }
 ```
 
-- [ ] **Step 1.8: Write `frontend/src/scenarios/index.ts`**
+- [x] **Step 1.8: Write `frontend/src/scenarios/index.ts`**
 
 ```ts
 import type { ScenarioDefinition } from '@/types/scenario'
@@ -448,7 +448,7 @@ export const ALL_SCENARIOS: Record<string, ScenarioDefinition> = {
 }
 ```
 
-- [ ] **Step 1.9: Write `frontend/src/scenarios/engine.ts`**
+- [x] **Step 1.9: Write `frontend/src/scenarios/engine.ts`**
 
 ```ts
 import type { Node, Edge } from '@xyflow/react'
@@ -482,7 +482,7 @@ export function submitDesign(
 }
 ```
 
-- [ ] **Step 1.10: Run full test suite to confirm no regressions**
+- [x] **Step 1.10: Run full test suite to confirm no regressions**
 
 ```bash
 cd frontend && npx vitest run
@@ -490,7 +490,7 @@ cd frontend && npx vitest run
 
 Expected: all tests PASS (existing store tests + new utils tests).
 
-- [ ] **Step 1.11: Commit**
+- [x] **Step 1.11: Commit**
 
 ```bash
 git add frontend/src/types/scenario.ts \
@@ -513,7 +513,7 @@ git add frontend/src/types/scenario.ts \
 - Produces: `useGameStore` actions `startScenario(scenarioId: string)` and `advanceTicket()`
 - Produces: three routes wired in `App.tsx` (`/`, `/play/:scenarioId`, `/answer/:scenarioId`)
 
-- [ ] **Step 2.1: Add scenario state to `useGameStore.ts`**
+- [x] **Step 2.1: Add scenario state to `useGameStore.ts`**
 
 Open `frontend/src/store/useGameStore.ts`. The existing `GameStore` interface currently has `nodes`, `edges`, and several action signatures. Add two new fields and two new actions:
 
@@ -545,7 +545,7 @@ advanceTicket: () => set(state => ({
 })),
 ```
 
-- [ ] **Step 2.2: Write tests for the new store actions**
+- [x] **Step 2.2: Write tests for the new store actions**
 
 Open `frontend/src/store/useGameStore.test.ts`. Read its current content first to understand the existing test structure (imports, beforeEach setup, describe blocks). Then append the following describe blocks at the end of the file:
 
@@ -598,7 +598,7 @@ describe('advanceTicket', () => {
 
 Make sure `INITIAL_NODES` and `INITIAL_EDGES` are imported at the top of the test file (add to the existing import from `@/types/game` if not already there).
 
-- [ ] **Step 2.3: Run the store tests to verify they pass**
+- [x] **Step 2.3: Run the store tests to verify they pass**
 
 ```bash
 cd frontend && npx vitest run src/store/useGameStore.test.ts
@@ -606,7 +606,7 @@ cd frontend && npx vitest run src/store/useGameStore.test.ts
 
 Expected: all tests PASS including the new ones.
 
-- [ ] **Step 2.4: Update `frontend/src/App.tsx` to use Routes**
+- [x] **Step 2.4: Update `frontend/src/App.tsx` to use Routes**
 
 Replace the entire file content:
 
@@ -634,7 +634,7 @@ Note: `main.tsx` already has `<BrowserRouter>` wrapping `<App />` - do NOT modif
 
 The page components referenced here (`ScenarioSelectPage`, `GameplayPage`, `AnswerPage`) do not exist yet - the TypeScript compiler will error until Task 4. That is expected at this stage.
 
-- [ ] **Step 2.5: Commit**
+- [x] **Step 2.5: Commit**
 
 ```bash
 git add frontend/src/store/useGameStore.ts \
@@ -657,7 +657,7 @@ git add frontend/src/store/useGameStore.ts \
 - Produces: `TicketBanner` component with `message: string` prop
 - Produces: `ResultModal` component with `result`, `isLastTicket`, `onNextTicket?`, `onRetry` props
 
-- [ ] **Step 3.1: Add the shadcn Dialog component**
+- [x] **Step 3.1: Add the shadcn Dialog component**
 
 Run from the `frontend/` directory:
 
@@ -667,7 +667,7 @@ cd frontend && npx shadcn@latest add dialog
 
 This creates `frontend/src/components/ui/dialog.tsx`. The `@radix-ui/react-dialog` package is already installed as a transitive dependency so no new package is downloaded.
 
-- [ ] **Step 3.2: Write `frontend/src/components/gameboard/TicketBanner.tsx`**
+- [x] **Step 3.2: Write `frontend/src/components/gameboard/TicketBanner.tsx`**
 
 ```tsx
 import { useState } from 'react'
@@ -702,7 +702,7 @@ export function TicketBanner({ message }: TicketBannerProps) {
 }
 ```
 
-- [ ] **Step 3.3: Write `frontend/src/components/gameboard/ResultModal.tsx`**
+- [x] **Step 3.3: Write `frontend/src/components/gameboard/ResultModal.tsx`**
 
 `Dialog` from shadcn closes on Esc by default - this is the correct behavior (the `onOpenChange` callback fires with `false` when the user presses Esc, which calls `onRetry` to clear the result).
 
@@ -776,7 +776,7 @@ export function ResultModal({ result, isLastTicket, onNextTicket, onRetry }: Res
 }
 ```
 
-- [ ] **Step 3.4: Run the full test suite to confirm no regressions**
+- [x] **Step 3.4: Run the full test suite to confirm no regressions**
 
 ```bash
 cd frontend && npx vitest run
@@ -784,7 +784,7 @@ cd frontend && npx vitest run
 
 Expected: all tests PASS.
 
-- [ ] **Step 3.5: Commit**
+- [x] **Step 3.5: Commit**
 
 ```bash
 git add frontend/src/components/ui/dialog.tsx \
@@ -812,7 +812,7 @@ git add frontend/src/components/ui/dialog.tsx \
 - Consumes: `TicketBanner` from `@/components/gameboard/TicketBanner` (Task 3)
 - Consumes: `ResultModal` from `@/components/gameboard/ResultModal` (Task 3)
 
-- [ ] **Step 4.1: Create `frontend/src/pages/ScenarioSelectPage.tsx`**
+- [x] **Step 4.1: Create `frontend/src/pages/ScenarioSelectPage.tsx`**
 
 ```tsx
 import { useNavigate } from 'react-router-dom'
@@ -846,7 +846,7 @@ export function ScenarioSelectPage() {
 }
 ```
 
-- [ ] **Step 4.2: Create `frontend/src/pages/GameplayPage.tsx`**
+- [x] **Step 4.2: Create `frontend/src/pages/GameplayPage.tsx`**
 
 Key behaviors:
 - On mount, calls `startScenario(scenarioId)` if the store's `currentScenarioId` does not match the URL param (handles direct navigation and page refresh)
@@ -927,7 +927,7 @@ export function GameplayPage() {
 }
 ```
 
-- [ ] **Step 4.3: Create `frontend/src/pages/AnswerPage.tsx`**
+- [x] **Step 4.3: Create `frontend/src/pages/AnswerPage.tsx`**
 
 This is a dev-only reference page. It renders a read-only React Flow canvas using the scenario's pre-built answer nodes and edges. No sidebar, no submit button, no store involvement.
 
@@ -983,7 +983,7 @@ export function AnswerPage() {
 }
 ```
 
-- [ ] **Step 4.4: Modify `frontend/src/components/gameboard/GameBoard.tsx`**
+- [x] **Step 4.4: Modify `frontend/src/components/gameboard/GameBoard.tsx`**
 
 Three changes:
 1. Add `GameBoardProps` interface with `onSubmit?` and `animateAllEdges?`
@@ -1027,7 +1027,7 @@ Add the Submit button immediately inside that div, before the `<AlertDialog>`:
 )}
 ```
 
-- [ ] **Step 4.5: Modify `frontend/src/components/gameboard/canvas/FlowCanvas.tsx`**
+- [x] **Step 4.5: Modify `frontend/src/components/gameboard/canvas/FlowCanvas.tsx`**
 
 Two changes:
 1. Add `animateAllEdges?: boolean` prop threading through `FlowCanvas` → `FlowCanvasInner`
@@ -1066,7 +1066,7 @@ export function FlowCanvas({ animateAllEdges = false }: FlowCanvasProps) {
 }
 ```
 
-- [ ] **Step 4.6: Run the full test suite**
+- [x] **Step 4.6: Run the full test suite**
 
 ```bash
 cd frontend && npx vitest run
@@ -1074,7 +1074,7 @@ cd frontend && npx vitest run
 
 Expected: all tests PASS.
 
-- [ ] **Step 4.7: Build the project to check for TypeScript errors**
+- [x] **Step 4.7: Build the project to check for TypeScript errors**
 
 ```bash
 cd frontend && npm run build
@@ -1082,7 +1082,7 @@ cd frontend && npm run build
 
 Expected: build completes with no TypeScript errors. If there are errors, fix them before committing.
 
-- [ ] **Step 4.8: Commit**
+- [x] **Step 4.8: Commit**
 
 ```bash
 git add frontend/src/pages/ \

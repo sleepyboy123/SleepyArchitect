@@ -8,6 +8,7 @@ import { VpcNode } from './nodes/VpcNode'
 import { SubnetNode } from './nodes/SubnetNode'
 import { ServiceNode } from './nodes/ServiceNode'
 import { TrafficEdge } from './edges/TrafficEdge'
+import type { TrafficAnimationConfig } from '@/types/scenario'
 import {
   SLOT_START_X,
   SLOT_START_Y,
@@ -25,13 +26,46 @@ import {
 const VALID_SERVICE_TYPES = new Set(SIDEBAR_ITEMS.map(i => i.serviceType))
 const SUBNET_IDS = ['public-subnet', 'private-subnet']
 
-// Still needed for the geometric midpoint fallback (non-subnet edges)
 function getAbsoluteNodePosition(nodeId: string, allNodes: Node[]): { x: number; y: number } {
   const node = allNodes.find(n => n.id === nodeId)
   if (!node) return { x: 0, y: 0 }
   if (!node.parentId) return { x: node.position.x, y: node.position.y }
   const parentPos = getAbsoluteNodePosition(node.parentId, allNodes)
   return { x: parentPos.x + node.position.x, y: parentPos.y + node.position.y }
+}
+
+// Perpendicular distance from point P to segment AB
+function distanceToSegment(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
+  const dx = bx - ax, dy = by - ay
+  const lenSq = dx * dx + dy * dy
+  if (lenSq === 0) return Math.hypot(px - ax, py - ay)
+  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / lenSq))
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+}
+
+// Fallback for edges where DOM hit-detection misses (e.g. both endpoints inside the same subnet).
+// Uses straight-line approximation between node centres; threshold is in flow-coordinate pixels.
+function findNearestEdge(
+  flowPos: { x: number; y: number },
+  edges: Edge[],
+  allNodes: Node[],
+  threshold = 25,
+): Edge | null {
+  // Approximate node centre offsets (service node is ~60x80 px in flow coords)
+  const CX = 30, CY = 40
+  let best: Edge | null = null
+  let bestDist = threshold
+  for (const edge of edges) {
+    const src = getAbsoluteNodePosition(edge.source, allNodes)
+    const tgt = getAbsoluteNodePosition(edge.target, allNodes)
+    const dist = distanceToSegment(
+      flowPos.x, flowPos.y,
+      src.x + CX, src.y + CY,
+      tgt.x + CX, tgt.y + CY,
+    )
+    if (dist < bestDist) { bestDist = dist; best = edge }
+  }
+  return best
 }
 
 interface DragPayload {
@@ -100,7 +134,7 @@ function resolveMidEdgeInsertion(
 
   // Fallback: targetSlot unknown, or entire row was full - try any free slot
   if (insertSlot < 0) {
-    insertSlot = Array.from({ length: 10 }, (_, i) => i).find(i => !(i in occupied)) ?? -1
+    insertSlot = Array.from({ length: SLOTS_PER_ROW * 2 }, (_, i) => i).find(i => !(i in occupied)) ?? -1
   }
 
   if (insertSlot < 0) return null
@@ -147,6 +181,7 @@ function resolveSubnetDrop(
 
 interface FlowCanvasProps {
   animateAllEdges?: boolean
+  trafficAnimation?: TrafficAnimationConfig
 }
 
 const nodeTypes = {
@@ -161,12 +196,16 @@ const edgeTypes = {
   trafficEdge: TrafficEdge,
 }
 
-function FlowCanvasInner({ animateAllEdges = false }: FlowCanvasProps) {
+function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanvasProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGameStore()
 
-  const displayEdges = animateAllEdges
-    ? edges.map(e => ({ ...e, animated: true }))
-    : edges
+  const displayEdges = edges.map(e => ({
+    ...e,
+    type: 'trafficEdge',
+    data: animateAllEdges
+      ? { ...e.data, isAnimating: true, trafficAnimation }
+      : e.data,
+  }))
   const { screenToFlowPosition } = useReactFlow()
   const addServiceNode = useGameStore(s => s.addServiceNode)
   const splitEdge = useGameStore(s => s.splitEdge)
@@ -225,7 +264,14 @@ function FlowCanvasInner({ animateAllEdges = false }: FlowCanvasProps) {
     const allNodes = useGameStore.getState().nodes
 
     // --- Mid-edge insertion ---
-    const hoveredEdgeId = hoveredEdgeRef.current
+    // Primary: DOM hit-detection (works for edges that cross subnet boundaries).
+    // Fallback: proximity check for intra-subnet edges whose slot <div>s intercept elementFromPoint.
+    let hoveredEdgeId = hoveredEdgeRef.current
+    if (!hoveredEdgeId) {
+      const allEdges = useGameStore.getState().edges
+      const nearest = findNearestEdge(flowPos, allEdges, allNodes)
+      if (nearest) hoveredEdgeId = nearest.id
+    }
     if (hoveredEdgeId) {
       const edge = useGameStore.getState().edges.find(ed => ed.id === hoveredEdgeId)
       if (edge) {
@@ -283,7 +329,7 @@ function FlowCanvasInner({ animateAllEdges = false }: FlowCanvasProps) {
       onNodeDragStop={onNodeDragStop}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
-      defaultEdgeOptions={{ type: 'default' }}
+      defaultEdgeOptions={{ type: 'trafficEdge' }}
       panOnDrag={false}
       zoomOnScroll={false}
       zoomOnPinch={false}
@@ -301,10 +347,10 @@ function FlowCanvasInner({ animateAllEdges = false }: FlowCanvasProps) {
   )
 }
 
-export function FlowCanvas({ animateAllEdges = false }: FlowCanvasProps) {
+export function FlowCanvas({ animateAllEdges = false, trafficAnimation }: FlowCanvasProps) {
   return (
     <ReactFlowProvider>
-      <FlowCanvasInner animateAllEdges={animateAllEdges} />
+      <FlowCanvasInner animateAllEdges={animateAllEdges} trafficAnimation={trafficAnimation} />
     </ReactFlowProvider>
   )
 }

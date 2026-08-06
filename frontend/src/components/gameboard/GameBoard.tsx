@@ -1,66 +1,18 @@
 import { Sidebar } from './Sidebar'
 import { FlowCanvas } from './canvas/FlowCanvas'
-import { useGameStore } from '@/store/useGameStore'
-import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from '@/components/ui/alert-dialog'
+import type { TrafficAnimationConfig } from '@/types/scenario'
 
 interface GameBoardProps {
-  onSubmit?: () => void
   animateAllEdges?: boolean
+  trafficAnimation?: TrafficAnimationConfig
 }
 
-export function GameBoard({ onSubmit, animateAllEdges = false }: GameBoardProps) {
-  const clearBoard = useGameStore(s => s.clearBoard)
-
+export function GameBoard({ animateAllEdges = false, trafficAnimation }: GameBoardProps) {
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
       <Sidebar />
       <div className="flex-1 relative">
-        <FlowCanvas animateAllEdges={animateAllEdges} />
-        <div className="absolute top-4 right-4 z-10 flex gap-2">
-          {onSubmit && (
-            <Button variant="default" size="sm" className="gap-1.5 shadow-sm" onClick={onSubmit}>
-              Submit
-            </Button>
-          )}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1.5 shadow-sm">
-                <Trash2 className="w-3.5 h-3.5" />
-                Clear Board
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Clear the board?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will remove all services and connections from the canvas.
-                  This cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={clearBoard}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Clear Board
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <FlowCanvas animateAllEdges={animateAllEdges} trafficAnimation={trafficAnimation} />
       </div>
     </div>
   )

@@ -55,11 +55,11 @@ export type AppNode = Node<ServiceNodeData, 'serviceNode'>
 export type AppEdge = Edge
 
 // Slot grid constants
-export const SLOTS_PER_ROW = 5
-export const SLOT_WIDTH = 76
-export const SLOT_HEIGHT = 90
-export const SLOT_START_X = 20
-export const SLOT_START_Y = 50
+export const SLOTS_PER_ROW = 7
+export const SLOT_WIDTH = 92
+export const SLOT_HEIGHT = 104
+export const SLOT_START_X = 24
+export const SLOT_START_Y = 52
 
 export function getSlotPosition(slotIndex: number): { x: number; y: number } {
   const col = slotIndex % SLOTS_PER_ROW

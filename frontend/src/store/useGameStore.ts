@@ -119,7 +119,7 @@ export const useGameStore = create<GameStore>()((set, _get) => ({
 
   onConnect: (connection) => {
     set(state => ({
-      edges: addEdge({ ...connection, type: 'default' }, state.edges),
+      edges: addEdge({ ...connection, type: 'trafficEdge' }, state.edges),
     }))
   },
 
@@ -142,8 +142,8 @@ export const useGameStore = create<GameStore>()((set, _get) => ({
       if (!edge) return state
       const remaining = state.edges.filter(e => e.id !== edgeId)
       const newEdges: Edge[] = [
-        { id: `${edge.source}-to-${newNodeId}`, source: edge.source, target: newNodeId, type: 'default' },
-        { id: `${newNodeId}-to-${edge.target}`, source: newNodeId, target: edge.target, type: 'default' },
+        { id: `${edge.source}-to-${newNodeId}`, source: edge.source, target: newNodeId, type: 'trafficEdge' },
+        { id: `${newNodeId}-to-${edge.target}`, source: newNodeId, target: edge.target, type: 'trafficEdge' },
       ]
       return { edges: [...remaining, ...newEdges] }
     })

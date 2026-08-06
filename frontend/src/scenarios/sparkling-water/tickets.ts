@@ -78,6 +78,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'scaling',
+    trafficAnimation: { bubbleCount: 10, bubbleSpeed: 1.2 },
     message: "hey rockstar, bossman suspects that his sparkling water is going to be all the rage this black friday. people are going to be swamping the site to get some of that spicy water... would be a shame if the site crashes.",
     validate(nodes, edges) {
       const albs = getNodesOfType(nodes, 'alb')
@@ -111,6 +112,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'security',
+    trafficAnimation: { bubbleColor: '#ef4444', bubbleCount: 6, bubbleSpeed: 1.6 },
     message: "hey rockstar, bossman has been doing some shady shit recently... real sussy baka... anyways i heard that a couple of hackers are targeting him so we might want to lock shit down if you know what i mean.",
     validate(nodes, edges) {
       const wafs = getNodesOfType(nodes, 'waf')

@@ -4,13 +4,14 @@ import type { SubnetNodeData } from '@/types/game'
 import {
   SLOT_WIDTH,
   SLOT_HEIGHT,
+  SLOTS_PER_ROW,
   SUBNET_WIDTH,
   SUBNET_HEIGHT,
   getSlotPosition,
 } from '@/types/game'
 import { cn } from '@/lib/utils'
 
-const TOTAL_SLOTS = 10
+const TOTAL_SLOTS = SLOTS_PER_ROW * 2
 
 export function SubnetNode({ data }: NodeProps) {
   const { label, subnetType, occupiedSlots } = data as SubnetNodeData

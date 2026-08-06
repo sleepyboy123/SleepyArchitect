@@ -5,11 +5,18 @@ export interface Objective {
   check: (nodes: Node[], edges: Edge[]) => boolean
 }
 
+export interface TrafficAnimationConfig {
+  bubbleCount?: number
+  bubbleColor?: string
+  bubbleSpeed?: number
+}
+
 export interface Ticket {
   id: string
   message: string
   validate: (nodes: Node[], edges: Edge[]) => boolean
   objectives: Objective[]
+  trafficAnimation?: TrafficAnimationConfig
 }
 
 export interface ScenarioDefinition {

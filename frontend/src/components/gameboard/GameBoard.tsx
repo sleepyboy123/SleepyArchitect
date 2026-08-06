@@ -15,15 +15,25 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 
-export function GameBoard() {
+interface GameBoardProps {
+  onSubmit?: () => void
+  animateAllEdges?: boolean
+}
+
+export function GameBoard({ onSubmit, animateAllEdges = false }: GameBoardProps) {
   const clearBoard = useGameStore(s => s.clearBoard)
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background">
+    <div className="flex h-full w-full overflow-hidden bg-background">
       <Sidebar />
       <div className="flex-1 relative">
-        <FlowCanvas />
-        <div className="absolute top-4 right-4 z-10">
+        <FlowCanvas animateAllEdges={animateAllEdges} />
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+          {onSubmit && (
+            <Button variant="default" size="sm" className="gap-1.5 shadow-sm" onClick={onSubmit}>
+              Submit
+            </Button>
+          )}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1.5 shadow-sm">

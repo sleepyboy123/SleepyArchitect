@@ -145,6 +145,10 @@ function resolveSubnetDrop(
   return null
 }
 
+interface FlowCanvasProps {
+  animateAllEdges?: boolean
+}
+
 const nodeTypes = {
   internetNode: InternetNode,
   igwNode: IgwNode,
@@ -157,8 +161,12 @@ const edgeTypes = {
   trafficEdge: TrafficEdge,
 }
 
-function FlowCanvasInner() {
+function FlowCanvasInner({ animateAllEdges = false }: FlowCanvasProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGameStore()
+
+  const displayEdges = animateAllEdges
+    ? edges.map(e => ({ ...e, animated: true }))
+    : edges
   const { screenToFlowPosition } = useReactFlow()
   const addServiceNode = useGameStore(s => s.addServiceNode)
   const splitEdge = useGameStore(s => s.splitEdge)
@@ -267,7 +275,8 @@ function FlowCanvasInner() {
   return (
     <ReactFlow
       nodes={nodes}
-      edges={edges}
+      edges={displayEdges}
+      deleteKeyCode={['Backspace', 'Delete']}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
@@ -292,10 +301,10 @@ function FlowCanvasInner() {
   )
 }
 
-export function FlowCanvas() {
+export function FlowCanvas({ animateAllEdges = false }: FlowCanvasProps) {
   return (
     <ReactFlowProvider>
-      <FlowCanvasInner />
+      <FlowCanvasInner animateAllEdges={animateAllEdges} />
     </ReactFlowProvider>
   )
 }

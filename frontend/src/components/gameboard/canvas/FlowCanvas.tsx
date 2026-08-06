@@ -1,4 +1,6 @@
-import { ReactFlow, ReactFlowProvider, Background } from '@xyflow/react'
+import { useCallback } from 'react'
+import { ReactFlow, ReactFlowProvider, Background, useReactFlow } from '@xyflow/react'
+import type { Node } from '@xyflow/react'
 import { useGameStore } from '@/store/useGameStore'
 import { InternetNode } from './nodes/InternetNode'
 import { IgwNode } from './nodes/IgwNode'
@@ -6,6 +8,23 @@ import { VpcNode } from './nodes/VpcNode'
 import { SubnetNode } from './nodes/SubnetNode'
 import { ServiceNode } from './nodes/ServiceNode'
 import { TrafficEdge } from './edges/TrafficEdge'
+import {
+  SLOT_START_X,
+  SLOT_START_Y,
+  SLOTS_PER_ROW,
+  SLOT_WIDTH,
+  SLOT_HEIGHT,
+  getSlotPosition,
+  type SubnetNodeData,
+} from '@/types/game'
+
+function getAbsoluteNodePosition(nodeId: string, allNodes: Node[]): { x: number; y: number } {
+  const node = allNodes.find(n => n.id === nodeId)
+  if (!node) return { x: 0, y: 0 }
+  if (!node.parentId) return { x: node.position.x, y: node.position.y }
+  const parentPos = getAbsoluteNodePosition(node.parentId, allNodes)
+  return { x: parentPos.x + node.position.x, y: parentPos.y + node.position.y }
+}
 
 const nodeTypes = {
   internetNode: InternetNode,
@@ -21,6 +40,68 @@ const edgeTypes = {
 
 function FlowCanvasInner() {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGameStore()
+  const { screenToFlowPosition } = useReactFlow()
+  const addServiceNode = useGameStore(s => s.addServiceNode)
+
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+  }, [])
+
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    const serviceType = e.dataTransfer.getData('serviceType')
+    const iconSrc = e.dataTransfer.getData('iconSrc')
+    const label = e.dataTransfer.getData('label')
+    const tooltip = e.dataTransfer.getData('tooltip')
+    if (!serviceType) return
+
+    const flowPos = screenToFlowPosition({ x: e.clientX, y: e.clientY })
+
+    const allNodes = useGameStore.getState().nodes
+    const subnetIds = ['public-subnet', 'private-subnet']
+
+    for (const subnetId of subnetIds) {
+      const subnetNode = allNodes.find(n => n.id === subnetId)
+      if (!subnetNode) continue
+
+      const absPos = getAbsoluteNodePosition(subnetId, allNodes)
+      const subnetW = SLOT_START_X * 2 + SLOTS_PER_ROW * SLOT_WIDTH
+      const subnetH = SLOT_START_Y + 2 * SLOT_HEIGHT + 20
+
+      if (
+        flowPos.x >= absPos.x &&
+        flowPos.x <= absPos.x + subnetW &&
+        flowPos.y >= absPos.y &&
+        flowPos.y <= absPos.y + subnetH
+      ) {
+        const relX = flowPos.x - absPos.x
+        const relY = flowPos.y - absPos.y
+        const col = Math.floor((relX - SLOT_START_X) / SLOT_WIDTH)
+        const row = Math.floor((relY - SLOT_START_Y) / SLOT_HEIGHT)
+
+        if (col < 0 || col >= SLOTS_PER_ROW || row < 0 || row > 1) return
+
+        const slotIndex = row * SLOTS_PER_ROW + col
+        const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
+        if (slotIndex in occupied) return
+
+        const slotPos = getSlotPosition(slotIndex)
+        const nodeId = `${serviceType}-${Date.now()}`
+
+        addServiceNode({
+          id: nodeId,
+          type: 'serviceNode',
+          position: slotPos,
+          parentId: subnetId,
+          extent: 'parent',
+          draggable: false,
+          data: { serviceType, label, iconSrc, tooltip, slotIndex },
+        })
+        return
+      }
+    }
+  }, [screenToFlowPosition, addServiceNode])
 
   return (
     <ReactFlow
@@ -42,6 +123,8 @@ function FlowCanvasInner() {
       fitView
       fitViewOptions={{ padding: 0.15 }}
       className="bg-background"
+      onDragOver={onDragOver}
+      onDrop={onDrop}
     >
       <Background />
     </ReactFlow>

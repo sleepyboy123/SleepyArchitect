@@ -4,6 +4,7 @@ import { InternetNode } from './nodes/InternetNode'
 import { IgwNode } from './nodes/IgwNode'
 import { VpcNode } from './nodes/VpcNode'
 import { SubnetNode } from './nodes/SubnetNode'
+import { ServiceNode } from './nodes/ServiceNode'
 import { TrafficEdge } from './edges/TrafficEdge'
 
 const nodeTypes = {
@@ -11,6 +12,7 @@ const nodeTypes = {
   igwNode: IgwNode,
   vpcNode: VpcNode,
   subnetNode: SubnetNode,
+  serviceNode: ServiceNode,
 }
 
 const edgeTypes = {

@@ -25,8 +25,6 @@ export function GameplayPage() {
   const { scenarioId } = useParams<{ scenarioId: string }>()
   const currentScenarioId = useGameStore(s => s.currentScenarioId)
   const currentTicketIndex = useGameStore(s => s.currentTicketIndex)
-  const nodes = useGameStore(s => s.nodes)
-  const edges = useGameStore(s => s.edges)
   const startScenario = useGameStore(s => s.startScenario)
   const advanceTicket = useGameStore(s => s.advanceTicket)
   const clearBoard = useGameStore(s => s.clearBoard)
@@ -52,6 +50,7 @@ export function GameplayPage() {
     if (!scenarioId) return
     setIsAnimating(true)
     setTimeout(() => {
+      const { nodes, edges } = useGameStore.getState()
       setIsAnimating(false)
       setResult(submitDesign(scenarioId!, currentTicketIndex, nodes, edges))
     }, 2000)
@@ -64,7 +63,7 @@ export function GameplayPage() {
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
-      {ticket && <TicketBanner message={ticket.message} />}
+      {ticket && <TicketBanner key={ticket.id} message={ticket.message} />}
 
       <div className="flex-1 overflow-hidden min-h-0">
         <GameBoard animateAllEdges={isAnimating} trafficAnimation={ticket?.trafficAnimation} />

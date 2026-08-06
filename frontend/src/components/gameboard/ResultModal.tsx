@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -32,6 +33,13 @@ export function ResultModal({ result, isLastTicket, onNextTicket, onRetry }: Res
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className={titleColor}>{title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {result.passed
+              ? isLastTicket
+                ? 'You have completed all tickets. Review your objectives and go back to scenarios.'
+                : 'Your design passed this ticket. Review your objectives and move to the next ticket.'
+              : 'Your design did not pass. Review your objectives and try again.'}
+          </DialogDescription>
         </DialogHeader>
 
         {result.objectives.length > 0 && (
@@ -57,7 +65,7 @@ export function ResultModal({ result, isLastTicket, onNextTicket, onRetry }: Res
           </Button>
           {result.passed && (
             isLastTicket
-              ? <Button onClick={() => navigate('/')}>Back to Scenarios</Button>
+              ? <Button onClick={() => { onNextTicket?.(); navigate('/') }}>Back to Scenarios</Button>
               : <Button onClick={onNextTicket}>Next Ticket</Button>
           )}
         </div>

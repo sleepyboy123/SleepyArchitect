@@ -35,12 +35,12 @@ const SERVICE_NODES: Node[] = [
 ]
 
 const SERVICE_EDGES: Edge[] = [
-  { id: 'igw-to-ans-waf', source: 'igw', target: 'ans-waf', type: 'default' },
-  { id: 'ans-waf-to-ans-alb', source: 'ans-waf', target: 'ans-alb', type: 'default' },
-  { id: 'ans-alb-to-ans-asg', source: 'ans-alb', target: 'ans-asg', type: 'default' },
-  { id: 'ans-asg-to-ans-frontend', source: 'ans-asg', target: 'ans-frontend', sourceHandle: 'to-frontend', type: 'default' },
-  { id: 'ans-asg-to-ans-backend', source: 'ans-asg', target: 'ans-backend', sourceHandle: 'to-backend', type: 'default' },
-  { id: 'ans-backend-to-ans-rds', source: 'ans-backend', target: 'ans-rds', type: 'default' },
+  { id: 'igw-to-ans-waf', source: 'igw', target: 'ans-waf', type: 'trafficEdge' },
+  { id: 'ans-waf-to-ans-alb', source: 'ans-waf', target: 'ans-alb', type: 'trafficEdge' },
+  { id: 'ans-alb-to-ans-asg', source: 'ans-alb', target: 'ans-asg', type: 'trafficEdge' },
+  { id: 'ans-asg-to-ans-frontend', source: 'ans-asg', target: 'ans-frontend', sourceHandle: 'to-frontend', type: 'trafficEdge' },
+  { id: 'ans-asg-to-ans-backend', source: 'ans-asg', target: 'ans-backend', sourceHandle: 'to-backend', type: 'trafficEdge' },
+  { id: 'ans-backend-to-ans-rds', source: 'ans-backend', target: 'ans-rds', type: 'trafficEdge' },
 ]
 
 export const ANSWER_NODES: Node[] = [

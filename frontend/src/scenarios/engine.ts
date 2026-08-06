@@ -8,8 +8,8 @@ export function submitDesign(
   nodes: Node[],
   edges: Edge[],
 ): ValidationResult {
+  if (!Object.hasOwn(ALL_SCENARIOS, scenarioId)) return { passed: false, objectives: [] }
   const scenario = ALL_SCENARIOS[scenarioId]
-  if (!scenario) return { passed: false, objectives: [] }
 
   for (let i = 0; i <= ticketIndex; i++) {
     if (!scenario.tickets[i].validate(nodes, edges)) {

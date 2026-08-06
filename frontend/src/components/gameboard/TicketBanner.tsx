@@ -33,7 +33,7 @@ export function TicketBanner({ message }: TicketBannerProps) {
         {isLong && (
           <button
             onClick={() => setExpanded(e => !e)}
-            className="shrink-0 mt-5 text-amber-600/70 hover:text-amber-700 dark:text-amber-500/70 dark:hover:text-amber-400 transition-colors"
+            className="shrink-0 mt-5 text-amber-600/70 hover:text-amber-700 dark:text-amber-500/70 dark:hover:text-amber-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded-sm"
             aria-label={expanded ? 'Collapse ticket' : 'Expand ticket'}
           >
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}

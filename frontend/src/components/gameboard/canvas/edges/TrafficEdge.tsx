@@ -1,5 +1,5 @@
 import { getBezierPath, type EdgeProps } from '@xyflow/react'
-import type { TrafficAnimationConfig } from '@/types/scenario'
+import type { TrafficAnimationConfig } from '@/types/game'
 
 export function TrafficEdge({
   id, sourceX, sourceY, targetX, targetY,

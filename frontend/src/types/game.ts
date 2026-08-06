@@ -46,6 +46,12 @@ export interface VpcNodeData extends Record<string, unknown> {
   label: string
 }
 
+export interface TrafficAnimationConfig {
+  bubbleCount?: number
+  bubbleColor?: string
+  bubbleSpeed?: number
+}
+
 export type AppNode = Node<ServiceNodeData, 'serviceNode'>
   | Node<SubnetNodeData, 'subnetNode'>
   | Node<VpcNodeData, 'vpcNode'>
@@ -106,5 +112,5 @@ export const INITIAL_NODES: Node[] = [
 
 export const INITIAL_EDGES: Edge[] = [
   { id: 'internet-to-igw', source: 'internet', target: 'igw', type: 'trafficEdge' },
-  { id: 'igw-to-public-subnet', source: 'igw', target: 'public-subnet', type: 'default' },
+  { id: 'igw-to-public-subnet', source: 'igw', target: 'public-subnet', type: 'trafficEdge' },
 ]

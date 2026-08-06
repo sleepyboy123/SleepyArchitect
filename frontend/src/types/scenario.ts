@@ -1,14 +1,11 @@
 import type { Node, Edge } from '@xyflow/react'
+import type { TrafficAnimationConfig } from '@/types/game'
+
+export type { TrafficAnimationConfig }
 
 export interface Objective {
   label: string
   check: (nodes: Node[], edges: Edge[]) => boolean
-}
-
-export interface TrafficAnimationConfig {
-  bubbleCount?: number
-  bubbleColor?: string
-  bubbleSpeed?: number
 }
 
 export interface Ticket {

@@ -1,6 +1,6 @@
 import { Sidebar } from './Sidebar'
 import { FlowCanvas } from './canvas/FlowCanvas'
-import type { TrafficAnimationConfig } from '@/types/scenario'
+import type { TrafficAnimationConfig } from '@/types/game'
 
 interface GameBoardProps {
   animateAllEdges?: boolean

@@ -26,7 +26,7 @@ export function Sidebar() {
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(c => !c)}
-        className="absolute -right-3 top-4 z-10 rounded-full border border-border bg-card p-0.5 hover:bg-accent transition-colors shadow-sm"
+        className="absolute -right-3 top-4 z-10 rounded-full border border-border bg-card p-0.5 hover:bg-accent transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
@@ -46,6 +46,7 @@ export function Sidebar() {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search..."
+                aria-label="Search services"
                 className="w-full pl-6 pr-2 py-1 text-xs rounded border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>

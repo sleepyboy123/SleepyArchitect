@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
 import { ReactFlow, ReactFlowProvider, Background, useReactFlow } from '@xyflow/react'
-import type { Node, Edge } from '@xyflow/react'
+import type { Node, Edge, NodeChange } from '@xyflow/react'
 import { useGameStore } from '@/store/useGameStore'
 import { InternetNode } from './nodes/InternetNode'
 import { IgwNode } from './nodes/IgwNode'
@@ -8,7 +8,7 @@ import { VpcNode } from './nodes/VpcNode'
 import { SubnetNode } from './nodes/SubnetNode'
 import { ServiceNode } from './nodes/ServiceNode'
 import { TrafficEdge } from './edges/TrafficEdge'
-import type { TrafficAnimationConfig } from '@/types/scenario'
+import type { TrafficAnimationConfig } from '@/types/game'
 import {
   SLOT_START_X,
   SLOT_START_Y,
@@ -184,7 +184,7 @@ interface FlowCanvasProps {
   trafficAnimation?: TrafficAnimationConfig
 }
 
-const nodeTypes = {
+export const nodeTypes = {
   internetNode: InternetNode,
   igwNode: IgwNode,
   vpcNode: VpcNode,
@@ -192,12 +192,26 @@ const nodeTypes = {
   serviceNode: ServiceNode,
 }
 
-const edgeTypes = {
+export const edgeTypes = {
   trafficEdge: TrafficEdge,
 }
 
 function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanvasProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGameStore()
+  const removeNode = useGameStore(s => s.removeNode)
+
+  // React Flow's built-in deleteKeyCode fires onNodesChange({ type:'remove' }) which goes
+  // through applyNodeChanges - skipping our custom removeNode that clears occupiedSlots.
+  // Intercept here: handle removes manually, pass everything else through unchanged.
+  const handleNodesChange = useCallback((changes: NodeChange[]) => {
+    const removes = changes.filter(c => c.type === 'remove')
+    const rest = changes.filter(c => c.type !== 'remove')
+    for (const change of removes) {
+      const node = useGameStore.getState().nodes.find(n => n.id === change.id)
+      if (node?.type === 'serviceNode') removeNode(change.id)
+    }
+    if (rest.length) onNodesChange(rest)
+  }, [onNodesChange, removeNode])
 
   const displayEdges = edges.map(e => ({
     ...e,
@@ -277,19 +291,21 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
       if (edge) {
         const targetNode = allNodes.find(n => n.id === edge.target)
         if (targetNode?.parentId && SUBNET_IDS.includes(targetNode.parentId)) {
-          const subnetNode = allNodes.find(n => n.id === targetNode.parentId)!
-          const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
-          const result = resolveMidEdgeInsertion(edge, allNodes, occupied)
-          if (result) {
-            for (const shift of result.slotsToShift) moveNodeToSlot(shift.nodeId, shift.to)
-            addServiceNode({
-              id: nodeId, type: 'serviceNode',
-              position: getSlotPosition(result.insertSlot),
-              parentId: targetNode.parentId, extent: 'parent', draggable: true,
-              data: { serviceType, label, iconSrc, tooltip, slotIndex: result.insertSlot },
-            })
-            splitEdge(edge.id, nodeId)
-            return
+          const subnetNode = allNodes.find(n => n.id === targetNode.parentId)
+          if (subnetNode) {
+            const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
+            const result = resolveMidEdgeInsertion(edge, allNodes, occupied)
+            if (result) {
+              for (const shift of result.slotsToShift) moveNodeToSlot(shift.nodeId, shift.to)
+              addServiceNode({
+                id: nodeId, type: 'serviceNode',
+                position: getSlotPosition(result.insertSlot),
+                parentId: targetNode.parentId, extent: 'parent', draggable: true,
+                data: { serviceType, label, iconSrc, tooltip, slotIndex: result.insertSlot },
+              })
+              splitEdge(edge.id, nodeId)
+              return
+            }
           }
         }
         // Geometric midpoint fallback (target not in subnet, or subnet full)
@@ -323,7 +339,7 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
       nodes={nodes}
       edges={displayEdges}
       deleteKeyCode={['Backspace', 'Delete']}
-      onNodesChange={onNodesChange}
+      onNodesChange={handleNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       onNodeDragStop={onNodeDragStop}

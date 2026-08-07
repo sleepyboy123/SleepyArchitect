@@ -19,6 +19,11 @@ export type ServiceType =
   | 'sqs'
   | 'sagemaker'
   | 'cognito'
+  | 'kinesis-data-streams'
+  | 'kinesis-firehose'
+  | 'lambda-processor'
+  | 's3'
+  | 'cloudwatch'
 
 export interface HandleConfig {
   type: 'source' | 'target'

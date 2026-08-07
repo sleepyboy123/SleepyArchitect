@@ -2,15 +2,14 @@ import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { X } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useGameStore } from '@/store/useGameStore'
-import { SIDEBAR_ITEMS, type ServiceNodeData } from '@/types/game'
+import { type ServiceNodeData } from '@/types/game'
 import { cn } from '@/lib/utils'
 
 export function ServiceNode({ id, data, selected }: NodeProps) {
-  const { label, iconSrc, tooltip, serviceType } = data as ServiceNodeData
+  const { label, iconSrc, tooltip, extraHandles } = data as ServiceNodeData
   const removeNode = useGameStore(s => s.removeNode)
 
-  const extraHandles = SIDEBAR_ITEMS.find(i => i.serviceType === serviceType)?.extraHandles ?? []
-  const extraBottomHandles = extraHandles.filter(h => h.position === 'Bottom')
+  const extraBottomHandles = (extraHandles ?? []).filter(h => h.position === 'Bottom')
 
   return (
     <Tooltip>

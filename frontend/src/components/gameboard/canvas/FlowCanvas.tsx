@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { ReactFlow, ReactFlowProvider, Background, useReactFlow } from '@xyflow/react'
 import type { Node, Edge, NodeChange } from '@xyflow/react'
 import { useGameStore } from '@/store/useGameStore'
@@ -17,13 +17,11 @@ import {
   SLOT_HEIGHT,
   SUBNET_WIDTH,
   SUBNET_HEIGHT,
-  SIDEBAR_ITEMS,
   getSlotPosition,
   type SubnetNodeData,
   type ServiceNodeData,
 } from '@/types/game'
 
-const VALID_SERVICE_TYPES = new Set(SIDEBAR_ITEMS.map(i => i.serviceType))
 const SUBNET_IDS = ['public-subnet', 'private-subnet']
 
 function getAbsoluteNodePosition(nodeId: string, allNodes: Node[]): { x: number; y: number } {
@@ -75,14 +73,14 @@ interface DragPayload {
   tooltip: string
 }
 
-function extractDragPayload(e: React.DragEvent): DragPayload | null {
+function extractDragPayload(e: React.DragEvent, validServiceTypes: Set<string>): DragPayload | null {
   const serviceType = e.dataTransfer.getData('serviceType')
   const iconSrc = e.dataTransfer.getData('iconSrc')
   const label = e.dataTransfer.getData('label')
   const tooltip = e.dataTransfer.getData('tooltip')
   if (
     !serviceType ||
-    !VALID_SERVICE_TYPES.has(serviceType as ServiceNodeData['serviceType']) ||
+    !validServiceTypes.has(serviceType) ||
     !iconSrc.startsWith('/aws-icons/')
   ) return null
   return { serviceType: serviceType as ServiceNodeData['serviceType'], iconSrc, label, tooltip }
@@ -199,6 +197,8 @@ export const edgeTypes = {
 function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanvasProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGameStore()
   const removeNode = useGameStore(s => s.removeNode)
+  const sidebarItems = useGameStore(s => s.sidebarItems)
+  const validServiceTypes = useMemo(() => new Set(sidebarItems.map(i => i.serviceType)), [sidebarItems])
 
   // React Flow's built-in deleteKeyCode fires onNodesChange({ type:'remove' }) which goes
   // through applyNodeChanges - skipping our custom removeNode that clears occupiedSlots.
@@ -269,9 +269,10 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-    const payload = extractDragPayload(e)
+    const payload = extractDragPayload(e, validServiceTypes)
     if (!payload) return
     const { serviceType, iconSrc, label, tooltip } = payload
+    const extraHandles = sidebarItems.find(i => i.serviceType === serviceType)?.extraHandles
 
     const flowPos = screenToFlowPosition({ x: e.clientX, y: e.clientY })
     const nodeId = `${serviceType}-${Date.now()}`
@@ -301,7 +302,7 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
                 id: nodeId, type: 'serviceNode',
                 position: getSlotPosition(result.insertSlot),
                 parentId: targetNode.parentId, extent: 'parent', draggable: true,
-                data: { serviceType, label, iconSrc, tooltip, slotIndex: result.insertSlot },
+                data: { serviceType, label, iconSrc, tooltip, slotIndex: result.insertSlot, extraHandles },
               })
               splitEdge(edge.id, nodeId)
               return
@@ -315,7 +316,7 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
           id: nodeId, type: 'serviceNode',
           position: { x: (srcAbs.x + tgtAbs.x) / 2 - 30, y: (srcAbs.y + tgtAbs.y) / 2 - 40 },
           draggable: true,
-          data: { serviceType, label, iconSrc, tooltip, slotIndex: -1 },
+          data: { serviceType, label, iconSrc, tooltip, slotIndex: -1, extraHandles },
         })
         splitEdge(edge.id, nodeId)
         return
@@ -329,10 +330,10 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
         id: nodeId, type: 'serviceNode',
         position: getSlotPosition(subnetDrop.slotIndex),
         parentId: subnetDrop.subnetId, extent: 'parent', draggable: true,
-        data: { serviceType, label, iconSrc, tooltip, slotIndex: subnetDrop.slotIndex },
+        data: { serviceType, label, iconSrc, tooltip, slotIndex: subnetDrop.slotIndex, extraHandles },
       })
     }
-  }, [screenToFlowPosition, addServiceNode, splitEdge, moveNodeToSlot])
+  }, [screenToFlowPosition, addServiceNode, splitEdge, moveNodeToSlot, validServiceTypes, sidebarItems])
 
   return (
     <ReactFlow

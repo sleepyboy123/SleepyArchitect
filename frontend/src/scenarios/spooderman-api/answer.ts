@@ -20,7 +20,7 @@ const SERVICE_NODES: Node[] = [
   {
     id: 'ans-lambda-handler', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
     position: getSlotPosition(0), draggable: false,
-    data: { serviceType: 'lambda', label: 'Lambda', iconSrc: '/aws-icons/lambda.svg', tooltip: 'Request handler function', slotIndex: 0 },
+    data: { serviceType: 'lambda-handler', label: 'Handler Lambda', iconSrc: '/aws-icons/lambda.svg', tooltip: 'Request handler function', slotIndex: 0 },
   },
   {
     id: 'ans-sqs', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
@@ -30,7 +30,7 @@ const SERVICE_NODES: Node[] = [
   {
     id: 'ans-lambda-worker', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
     position: getSlotPosition(2), draggable: false,
-    data: { serviceType: 'lambda', label: 'Lambda', iconSrc: '/aws-icons/lambda.svg', tooltip: 'Async worker function', slotIndex: 2 },
+    data: { serviceType: 'lambda-worker', label: 'Worker Lambda', iconSrc: '/aws-icons/lambda.svg', tooltip: 'Async worker function', slotIndex: 2 },
   },
   {
     id: 'ans-dynamodb', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',

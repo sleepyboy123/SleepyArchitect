@@ -15,7 +15,10 @@ const SERVICE_NODES: Node[] = [
   {
     id: 'ans-asg', type: 'serviceNode', parentId: 'public-subnet', extent: 'parent',
     position: getSlotPosition(2), draggable: false,
-    data: { serviceType: 'asg', label: 'ASG', iconSrc: '/aws-icons/asg.svg', tooltip: 'Auto Scaling Group', slotIndex: 2 },
+    data: { serviceType: 'asg', label: 'ASG', iconSrc: '/aws-icons/asg.svg', tooltip: 'Auto Scaling Group', slotIndex: 2, extraHandles: [
+      { type: 'source', position: 'Bottom', id: 'to-frontend', style: { left: '30%' }, colorClass: '!bg-primary' },
+      { type: 'source', position: 'Bottom', id: 'to-backend', style: { left: '70%' }, colorClass: '!bg-primary' },
+    ] },
   },
   {
     id: 'ans-frontend', type: 'serviceNode', parentId: 'public-subnet', extent: 'parent',

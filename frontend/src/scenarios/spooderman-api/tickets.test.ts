@@ -66,20 +66,36 @@ describe('ticket 4 - async-processing', () => {
     return ticket.validate(nodes, [...baseEdges, ...extraEdges])
   }
 
-  it('fails with only one lambda', () => {
+  it('fails when handler exists but no worker connected from SQS', () => {
     const result = fullSetup(
-      [makeService('lambda1', 'lambda', 'private-subnet'), makeService('sqs1', 'sqs', 'private-subnet')],
+      [
+        makeService('lambda1', 'lambda-handler', 'private-subnet'),
+        makeService('sqs1', 'sqs', 'private-subnet'),
+        makeService('lambda2', 'lambda-worker', 'private-subnet'),
+      ],
+      [
+        edge('apigw', 'lambda1'),
+        edge('lambda1', 'sqs1'),
+        edge('lambda1', 'dynamodb1'),
+      ],
+    )
+    expect(result).toBe(false)
+  })
+
+  it('fails with only a handler lambda and no worker', () => {
+    const result = fullSetup(
+      [makeService('lambda1', 'lambda-handler', 'private-subnet'), makeService('sqs1', 'sqs', 'private-subnet')],
       [edge('apigw', 'lambda1'), edge('lambda1', 'sqs1'), edge('lambda1', 'dynamodb1')],
     )
     expect(result).toBe(false)
   })
 
-  it('passes with two lambdas and sqs between them', () => {
+  it('passes with handler lambda sending to SQS and worker lambda receiving from SQS', () => {
     const result = fullSetup(
       [
-        makeService('lambda1', 'lambda', 'private-subnet'),
+        makeService('lambda1', 'lambda-handler', 'private-subnet'),
         makeService('sqs1', 'sqs', 'private-subnet'),
-        makeService('lambda2', 'lambda', 'private-subnet'),
+        makeService('lambda2', 'lambda-worker', 'private-subnet'),
       ],
       [
         edge('apigw', 'lambda1'),

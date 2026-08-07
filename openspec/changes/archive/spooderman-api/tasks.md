@@ -1,6 +1,6 @@
 # Spooderman API Scenario Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use the `implementing` skill to execute this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use the `implementing` skill to execute this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Add a second game scenario (serverless API Gateway + Lambda), make sidebars per-scenario, move shared validation utils, rename scenario 1, and fix two tooltip bugs.
 
@@ -31,7 +31,7 @@
 **Interfaces:**
 - Produces: five icon paths consumed by Tasks 4 and 6 sidebar item definitions.
 
-- [ ] **Step 1: Copy the five SVGs from the package folder**
+- [x] **Step 1: Copy the five SVGs from the package folder**
 
 ```bash
 cp "aws-icon-packages/Architecture-Service-Icons_04302026/Arch_Networking-Content-Delivery/48/Arch_Amazon-API-Gateway_48.svg" "frontend/public/aws-icons/api-gateway.svg"
@@ -41,7 +41,7 @@ cp "aws-icon-packages/Architecture-Service-Icons_04302026/Arch_Application-Integ
 cp "aws-icon-packages/Architecture-Service-Icons_04302026/Arch_Security-Identity/48/Arch_Amazon-Cognito_48.svg" "frontend/public/aws-icons/cognito.svg"
 ```
 
-- [ ] **Step 2: Verify all five files landed**
+- [x] **Step 2: Verify all five files landed**
 
 ```bash
 ls frontend/public/aws-icons/
@@ -49,7 +49,7 @@ ls frontend/public/aws-icons/
 
 Expected: `alb.svg  api-gateway.svg  asg.svg  cognito.svg  dynamodb.svg  ec2.svg  ecs.svg  igw.svg  lambda.svg  nat.svg  private-subnet.svg  public-subnet.svg  rds.svg  sqs.svg  vpc.svg  waf.svg`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add frontend/public/aws-icons/api-gateway.svg frontend/public/aws-icons/lambda.svg frontend/public/aws-icons/dynamodb.svg frontend/public/aws-icons/sqs.svg frontend/public/aws-icons/cognito.svg
@@ -73,7 +73,7 @@ git commit -m "feat: add api-gateway, lambda, dynamodb, sqs, cognito icon assets
   - `ScenarioDefinition.sidebarItems: SidebarItem[]` (required field)
   - `src/scenarios/validation/utils.ts` exports: `getNodesOfType`, `getNodesInSubnet`, `hasEdgeBetween`, `hasPathBetween`, `isReachableFromIgw` - same signatures as before
 
-- [ ] **Step 1: Add 5 new ServiceType values to `frontend/src/types/game.ts`**
+- [x] **Step 1: Add 5 new ServiceType values to `frontend/src/types/game.ts`**
 
 Find the `ServiceType` export (line 4) and extend the union:
 
@@ -95,7 +95,7 @@ export type ServiceType =
   | 'cognito'
 ```
 
-- [ ] **Step 2: Add `sidebarItems` field to `ScenarioDefinition` in `frontend/src/types/scenario.ts`**
+- [x] **Step 2: Add `sidebarItems` field to `ScenarioDefinition` in `frontend/src/types/scenario.ts`**
 
 Current import line (line 2):
 ```ts
@@ -120,7 +120,7 @@ export interface ScenarioDefinition {
 }
 ```
 
-- [ ] **Step 3: Create `frontend/src/scenarios/validation/utils.ts` (shared)**
+- [x] **Step 3: Create `frontend/src/scenarios/validation/utils.ts` (shared)**
 
 ```ts
 import type { Node, Edge } from '@xyflow/react'
@@ -164,7 +164,7 @@ export function isReachableFromIgw(nodes: Node[], edges: Edge[], targetId: strin
 }
 ```
 
-- [ ] **Step 4: Replace `frontend/src/scenarios/sparkling-water/validation/utils.ts` with a re-export**
+- [x] **Step 4: Replace `frontend/src/scenarios/sparkling-water/validation/utils.ts` with a re-export**
 
 Replace the entire file contents with:
 
@@ -178,7 +178,7 @@ export {
 } from '@/scenarios/validation/utils'
 ```
 
-- [ ] **Step 5: Run existing tests to confirm nothing broke**
+- [x] **Step 5: Run existing tests to confirm nothing broke**
 
 ```bash
 cd frontend && npx vitest run
@@ -186,7 +186,7 @@ cd frontend && npx vitest run
 
 Expected: all existing tests pass. The `utils.test.ts` file imports from `./utils` which now re-exports - this is transparent to the test runner.
 
-- [ ] **Step 6: TypeScript check**
+- [x] **Step 6: TypeScript check**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -194,7 +194,7 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add frontend/src/types/game.ts frontend/src/types/scenario.ts frontend/src/scenarios/validation/utils.ts frontend/src/scenarios/sparkling-water/validation/utils.ts
@@ -218,7 +218,7 @@ git commit -m "refactor: add new ServiceTypes, ScenarioDefinition.sidebarItems, 
   - `useGameStore` action: `setScenario(scenario: ScenarioDefinition): void` - sets `sidebarItems` from the scenario
   - `Sidebar` reads `sidebarItems` from the store instead of the removed `SIDEBAR_ITEMS` constant
 
-- [ ] **Step 1: Write failing tests for `setScenario` in `frontend/src/store/useGameStore.test.ts`**
+- [x] **Step 1: Write failing tests for `setScenario` in `frontend/src/store/useGameStore.test.ts`**
 
 Append this block at the bottom of the file (after the existing `advanceTicket` describe block):
 
@@ -268,7 +268,7 @@ describe('setScenario', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to confirm the new tests fail**
+- [x] **Step 2: Run tests to confirm the new tests fail**
 
 ```bash
 cd frontend && npx vitest run
@@ -276,7 +276,7 @@ cd frontend && npx vitest run
 
 Expected: the two new `setScenario` tests fail with "sidebarItems is not a function" or similar.
 
-- [ ] **Step 3: Add `sidebarItems` state and `setScenario` action to `frontend/src/store/useGameStore.ts`**
+- [x] **Step 3: Add `sidebarItems` state and `setScenario` action to `frontend/src/store/useGameStore.ts`**
 
 Add these imports at the top (after the existing imports from `@/types/game`):
 
@@ -324,7 +324,7 @@ export const useGameStore = create<GameStore>()((set, _get) => ({
 
 Add `setScenario` before or after `advanceTicket` - either position is fine.
 
-- [ ] **Step 4: Run tests to confirm `setScenario` tests now pass**
+- [x] **Step 4: Run tests to confirm `setScenario` tests now pass**
 
 ```bash
 cd frontend && npx vitest run
@@ -332,7 +332,7 @@ cd frontend && npx vitest run
 
 Expected: all tests pass, including the two new `setScenario` tests.
 
-- [ ] **Step 5: Update `frontend/src/components/gameboard/Sidebar.tsx` to read from store**
+- [x] **Step 5: Update `frontend/src/components/gameboard/Sidebar.tsx` to read from store**
 
 Replace the import line:
 ```ts
@@ -358,11 +358,11 @@ const filtered = query.trim()
   : sidebarItems
 ```
 
-- [ ] **Step 6: Remove `SIDEBAR_ITEMS` from `frontend/src/types/game.ts`**
+- [x] **Step 6: Remove `SIDEBAR_ITEMS` from `frontend/src/types/game.ts`**
 
 Delete the entire `SIDEBAR_ITEMS` constant (the `export const SIDEBAR_ITEMS: SidebarItem[] = [...]` block, roughly lines 79-92 in the original file). Leave all other exports untouched.
 
-- [ ] **Step 7: TypeScript check**
+- [x] **Step 7: TypeScript check**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -370,7 +370,7 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors. If `SIDEBAR_ITEMS` is still imported anywhere, the compiler will tell you which file.
 
-- [ ] **Step 8: Run full test suite**
+- [x] **Step 8: Run full test suite**
 
 ```bash
 cd frontend && npx vitest run
@@ -378,7 +378,7 @@ cd frontend && npx vitest run
 
 Expected: all tests pass.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add frontend/src/store/useGameStore.ts frontend/src/store/useGameStore.test.ts frontend/src/components/gameboard/Sidebar.tsx frontend/src/types/game.ts
@@ -397,7 +397,7 @@ git commit -m "refactor: per-scenario sidebar via setScenario store action; remo
 - Consumes: `SidebarItem` from `@/types/game`; `setScenario` action from store (Task 3); `sidebarItems` field on `ScenarioDefinition` (Task 2).
 - Produces: Sparkling Secret scenario conforms to the updated `ScenarioDefinition`; `GameplayPage` calls `setScenario` on mount so the sidebar populates correctly.
 
-- [ ] **Step 1: Update `frontend/src/scenarios/sparkling-water/index.ts`**
+- [x] **Step 1: Update `frontend/src/scenarios/sparkling-water/index.ts`**
 
 Replace the entire file with:
 
@@ -433,7 +433,7 @@ export const sparklingWater: ScenarioDefinition = {
 }
 ```
 
-- [ ] **Step 2: Wire `setScenario` in `frontend/src/pages/GameplayPage.tsx`**
+- [x] **Step 2: Wire `setScenario` in `frontend/src/pages/GameplayPage.tsx`**
 
 Add `setScenario` to the store subscriptions (near line 28, alongside the other `useGameStore` selectors):
 
@@ -452,7 +452,7 @@ useEffect(() => {
 
 Also add `setScenario` to the existing useEffect dependency array if a linter complains, though it is not in the existing condition logic so it does not need to be there.
 
-- [ ] **Step 3: TypeScript check**
+- [x] **Step 3: TypeScript check**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -460,7 +460,7 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors.
 
-- [ ] **Step 4: Run full test suite**
+- [x] **Step 4: Run full test suite**
 
 ```bash
 cd frontend && npx vitest run
@@ -468,7 +468,7 @@ cd frontend && npx vitest run
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add frontend/src/scenarios/sparkling-water/index.ts frontend/src/pages/GameplayPage.tsx
@@ -487,7 +487,7 @@ git commit -m "feat: rename scenario 1 to Sparkling Secret, add sidebarItems, wi
 - Consumes: nothing new.
 - Produces: both canvas nodes show a tooltip on hover; no automated tests (visual verification required).
 
-- [ ] **Step 1: Fix pointer-events on `IgwNode.tsx`**
+- [x] **Step 1: Fix pointer-events on `IgwNode.tsx`**
 
 The node has `selectable: false` in `INITIAL_NODES`, which causes React Flow to set `pointer-events: none` on the wrapper element. The tooltip trigger never receives hover events. Fix by adding `style={{ pointerEvents: 'all' }}` to the outermost `<div>` inside the component.
 
@@ -501,7 +501,7 @@ Replace with:
 <div className="flex flex-col items-center gap-1 select-none w-20 cursor-default" style={{ pointerEvents: 'all' }}>
 ```
 
-- [ ] **Step 2: Add tooltip to `InternetNode.tsx`**
+- [x] **Step 2: Add tooltip to `InternetNode.tsx`**
 
 Replace the entire file with:
 
@@ -529,7 +529,7 @@ export function InternetNode() {
 }
 ```
 
-- [ ] **Step 3: TypeScript check**
+- [x] **Step 3: TypeScript check**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -537,11 +537,11 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors.
 
-- [ ] **Step 4: Visual verification**
+- [x] **Step 4: Visual verification**
 
 Start the dev server (`docker compose up` or `cd frontend && npm run dev`) and open the game. Hover over the IGW node and the Internet cloud node. Both should show tooltips within ~300ms.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add frontend/src/components/gameboard/canvas/nodes/IgwNode.tsx frontend/src/components/gameboard/canvas/nodes/InternetNode.tsx
@@ -563,7 +563,7 @@ git commit -m "fix: restore IGW tooltip pointer-events; add tooltip to InternetN
 - Consumes: shared validation utils from `@/scenarios/validation/utils`; `INITIAL_NODES`, `INITIAL_EDGES`, `getSlotPosition` from `@/types/game`; `ScenarioDefinition`, `SidebarItem` types.
 - Produces: `spooderman-api` registered in `ALL_SCENARIOS`; accessible at `/play/spooderman-api` and `/answer/spooderman-api`.
 
-- [ ] **Step 1: Write failing validator tests in `frontend/src/scenarios/spooderman-api/tickets.test.ts`**
+- [x] **Step 1: Write failing validator tests in `frontend/src/scenarios/spooderman-api/tickets.test.ts`**
 
 ```ts
 import { describe, it, expect } from 'vitest'
@@ -661,7 +661,7 @@ describe('ticket 4 - async-processing', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail (tickets module does not exist yet)**
+- [x] **Step 2: Run tests to confirm they fail (tickets module does not exist yet)**
 
 ```bash
 cd frontend && npx vitest run src/scenarios/spooderman-api/tickets.test.ts
@@ -669,7 +669,7 @@ cd frontend && npx vitest run src/scenarios/spooderman-api/tickets.test.ts
 
 Expected: error - cannot find module `./tickets`.
 
-- [ ] **Step 3: Create `frontend/src/scenarios/spooderman-api/tickets.ts`**
+- [x] **Step 3: Create `frontend/src/scenarios/spooderman-api/tickets.ts`**
 
 ```ts
 import type { Ticket } from '@/types/scenario'
@@ -816,7 +816,7 @@ export const tickets: Ticket[] = [
 ]
 ```
 
-- [ ] **Step 4: Run validator tests to confirm they pass**
+- [x] **Step 4: Run validator tests to confirm they pass**
 
 ```bash
 cd frontend && npx vitest run src/scenarios/spooderman-api/tickets.test.ts
@@ -824,7 +824,7 @@ cd frontend && npx vitest run src/scenarios/spooderman-api/tickets.test.ts
 
 Expected: all 5 tests pass.
 
-- [ ] **Step 5: Create `frontend/src/scenarios/spooderman-api/answer.ts`**
+- [x] **Step 5: Create `frontend/src/scenarios/spooderman-api/answer.ts`**
 
 ```ts
 import type { Node, Edge } from '@xyflow/react'
@@ -894,7 +894,7 @@ export const ANSWER_NODES: Node[] = [
 export const ANSWER_EDGES: Edge[] = [...INITIAL_EDGES, ...SERVICE_EDGES]
 ```
 
-- [ ] **Step 6: Create `frontend/src/scenarios/spooderman-api/index.ts`**
+- [x] **Step 6: Create `frontend/src/scenarios/spooderman-api/index.ts`**
 
 ```ts
 import type { ScenarioDefinition } from '@/types/scenario'
@@ -922,7 +922,7 @@ export const spoodermanApi: ScenarioDefinition = {
 }
 ```
 
-- [ ] **Step 7: Register the scenario in `frontend/src/scenarios/index.ts`**
+- [x] **Step 7: Register the scenario in `frontend/src/scenarios/index.ts`**
 
 Replace the entire file with:
 
@@ -937,7 +937,7 @@ export const ALL_SCENARIOS: Record<string, ScenarioDefinition> = {
 }
 ```
 
-- [ ] **Step 8: Run full test suite**
+- [x] **Step 8: Run full test suite**
 
 ```bash
 cd frontend && npx vitest run
@@ -945,7 +945,7 @@ cd frontend && npx vitest run
 
 Expected: all tests pass, including the new validator tests.
 
-- [ ] **Step 9: TypeScript check**
+- [x] **Step 9: TypeScript check**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -953,7 +953,7 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add frontend/src/scenarios/spooderman-api/tickets.ts frontend/src/scenarios/spooderman-api/tickets.test.ts frontend/src/scenarios/spooderman-api/answer.ts frontend/src/scenarios/spooderman-api/index.ts frontend/src/scenarios/index.ts

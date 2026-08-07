@@ -28,7 +28,7 @@ export function GameplayPage() {
   const startScenario = useGameStore(s => s.startScenario)
   const advanceTicket = useGameStore(s => s.advanceTicket)
   const clearBoard = useGameStore(s => s.clearBoard)
-  const setScenario = useGameStore(s => s.setScenario)
+  const resetScenario = useGameStore(s => s.resetScenario)
 
   const [result, setResult] = useState<ValidationResult | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
@@ -38,14 +38,9 @@ export function GameplayPage() {
   useEffect(() => {
     if (!scenarioId || !scenario) return
     if (scenarioId !== currentScenarioId || currentTicketIndex >= scenario.tickets.length) {
-      startScenario(scenarioId)
+      startScenario(scenario)
     }
   }, [scenarioId, currentScenarioId, currentTicketIndex, scenario, startScenario])
-
-  useEffect(() => {
-    if (!scenario) return
-    setScenario(scenario)
-  }, [scenario, setScenario])
 
   if (!scenario) return <Navigate to="/" replace />
 
@@ -64,6 +59,11 @@ export function GameplayPage() {
 
   function handleNextTicket() {
     advanceTicket()
+    setResult(null)
+  }
+
+  function handleResetScenario() {
+    resetScenario()
     setResult(null)
   }
 
@@ -115,6 +115,7 @@ export function GameplayPage() {
           isLastTicket={isLastTicket}
           onNextTicket={result.passed ? handleNextTicket : undefined}
           onRetry={() => setResult(null)}
+          onResetScenario={handleResetScenario}
         />
       )}
     </div>

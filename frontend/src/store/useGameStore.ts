@@ -23,12 +23,12 @@ interface GameStore {
   removeNode: (nodeId: string) => void
   moveNodeToSlot: (nodeId: string, newSlotIndex: number) => void
   clearBoard: () => void
+  resetScenario: () => void
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
   onConnect: (connection: Connection) => void
   splitEdge: (edgeId: string, newNodeId: string) => void
-  startScenario: (scenarioId: string) => void
-  setScenario: (scenario: ScenarioDefinition) => void
+  startScenario: (scenario: ScenarioDefinition) => void
   advanceTicket: () => void
 }
 
@@ -129,14 +129,15 @@ export const useGameStore = create<GameStore>()((set, _get) => ({
 
   clearBoard: () => set({ nodes: INITIAL_NODES, edges: INITIAL_EDGES }),
 
-  startScenario: (scenarioId) => set({
-    currentScenarioId: scenarioId,
+  resetScenario: () => set({ nodes: INITIAL_NODES, edges: INITIAL_EDGES, currentTicketIndex: 0 }),
+
+  startScenario: (scenario) => set({
+    currentScenarioId: scenario.id,
     currentTicketIndex: 0,
     nodes: INITIAL_NODES,
     edges: INITIAL_EDGES,
+    sidebarItems: scenario.sidebarItems,
   }),
-
-  setScenario: (scenario) => set({ sidebarItems: scenario.sidebarItems }),
 
   advanceTicket: () => set(state => ({
     currentTicketIndex: state.currentTicketIndex + 1,

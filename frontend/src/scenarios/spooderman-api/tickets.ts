@@ -11,10 +11,10 @@ const STRUCTURAL_IDS = new Set(['internet', 'igw', 'internet-vpc', 'app-vpc', 'p
 export const tickets: Ticket[] = [
   {
     id: 'api-online',
-    message: '[placeholder] Put the API on the internet.',
+    message: 'hey rockstar, bossman has been vibecoding something out to track spooderman. he wants to put it out onto the web. haha get it?',
     validate(nodes, edges) {
       const gateways = getNodesOfType(nodes, 'api-gateway')
-      const lambdas = getNodesOfType(nodes, 'lambda')
+      const lambdas = getNodesOfType(nodes, 'lambda', 'lambda-handler', 'lambda-worker')
       if (gateways.length === 0 || lambdas.length === 0) return false
       const gatewayReachable = gateways.some(gw => isReachableFromIgw(nodes, edges, gw.id))
       if (!gatewayReachable) return false
@@ -37,10 +37,10 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'save-data',
-    message: '[placeholder] We need to save stuff.',
+    message: 'hey rockstar, bossman wants to save some of this spooderman data somewhere. he kind of wants to map out where spooderman goes. sort of like a web...',
     validate(nodes, edges) {
       const dynamos = getNodesOfType(nodes, 'dynamodb')
-      const lambdas = getNodesOfType(nodes, 'lambda')
+      const lambdas = getNodesOfType(nodes, 'lambda', 'lambda-handler', 'lambda-worker')
       if (dynamos.length === 0 || lambdas.length === 0) return false
       return dynamos.some(db => lambdas.some(l => hasEdgeBetween(edges, db.id, l.id)))
     },
@@ -55,7 +55,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'auth',
-    message: '[placeholder] Users are logging in as each other.',
+    message: 'hey rockstar, apparently the sinister six have been using this platform to track spooderman. who would have thought. we should do something about that',
     validate(nodes, edges) {
       const cognitos = getNodesOfType(nodes, 'cognito')
       const gateways = getNodesOfType(nodes, 'api-gateway')
@@ -84,14 +84,19 @@ export const tickets: Ticket[] = [
   {
     id: 'async-processing',
     trafficAnimation: { bubbleCount: 8, bubbleSpeed: 1.2 },
-    message: '[placeholder] Requests are timing out.',
+    message: 'hey rockstar, some people have been complaining that their requests have been timing out? maybe your lambda is doing too much at once. Maybe we can split it? One lambda to respond to the request, one lambda to do the actual work and a queue in the middle to make sure nothing is lost.',
     validate(nodes, edges) {
       const sqsList = getNodesOfType(nodes, 'sqs')
-      const lambdas = getNodesOfType(nodes, 'lambda')
-      if (sqsList.length === 0 || lambdas.length < 2) return false
-      const lambdaToSqs = sqsList.some(sqs => lambdas.some(l => hasEdgeBetween(edges, l.id, sqs.id)))
-      const sqsToLambda = sqsList.some(sqs => lambdas.some(l => hasEdgeBetween(edges, sqs.id, l.id)))
-      return lambdaToSqs && sqsToLambda
+      const handlers = getNodesOfType(nodes, 'lambda-handler')
+      const workers = getNodesOfType(nodes, 'lambda-worker')
+      if (sqsList.length === 0 || handlers.length === 0 || workers.length === 0) return false
+      const hasProducer = sqsList.some(sqs =>
+        handlers.some(h => edges.some(e => e.source === h.id && e.target === sqs.id))
+      )
+      const hasConsumer = sqsList.some(sqs =>
+        workers.some(w => edges.some(e => e.source === sqs.id && e.target === w.id))
+      )
+      return hasProducer && hasConsumer
     },
     objectives: [
       {
@@ -101,9 +106,23 @@ export const tickets: Ticket[] = [
         },
       },
       {
-        label: 'Two Lambda functions are present',
-        check(nodes) {
-          return getNodesOfType(nodes, 'lambda').length >= 2
+        label: 'Handler Lambda sends to SQS',
+        check(nodes, edges) {
+          const handlers = getNodesOfType(nodes, 'lambda-handler')
+          const sqsList = getNodesOfType(nodes, 'sqs')
+          return sqsList.some(sqs =>
+            handlers.some(h => edges.some(e => e.source === h.id && e.target === sqs.id))
+          )
+        },
+      },
+      {
+        label: 'Worker Lambda receives from SQS',
+        check(nodes, edges) {
+          const workers = getNodesOfType(nodes, 'lambda-worker')
+          const sqsList = getNodesOfType(nodes, 'sqs')
+          return sqsList.some(sqs =>
+            workers.some(w => edges.some(e => e.source === sqs.id && e.target === w.id))
+          )
         },
       },
     ],
@@ -111,7 +130,7 @@ export const tickets: Ticket[] = [
   {
     id: 'security',
     trafficAnimation: { bubbleColor: '#ef4444', bubbleCount: 6, bubbleSpeed: 1.6 },
-    message: '[placeholder] Security team is breathing down our necks.',
+    message: 'hey rockstar, QUICK!! the sinister six is attacking our api. There has got to be a way to protect ourselves.',
     validate(nodes, edges) {
       const wafs = getNodesOfType(nodes, 'waf')
       if (wafs.length === 0) return false

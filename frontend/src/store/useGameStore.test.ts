@@ -56,6 +56,21 @@ describe('useGameStore', () => {
   })
 })
 
+const mockScenario = (id: string, sidebarServiceTypes: ServiceType[] = []) => ({
+  id,
+  title: id,
+  description: id,
+  tickets: [],
+  answerNodes: [],
+  answerEdges: [],
+  sidebarItems: sidebarServiceTypes.map(st => ({
+    serviceType: st,
+    label: st,
+    iconSrc: `/aws-icons/${st}.svg`,
+    tooltip: st,
+  })),
+})
+
 describe('startScenario', () => {
   beforeEach(() => {
     useGameStore.setState({
@@ -63,24 +78,38 @@ describe('startScenario', () => {
       currentTicketIndex: 5,
       nodes: [],
       edges: [],
+      sidebarItems: [],
     })
   })
 
   it('sets currentScenarioId', () => {
-    useGameStore.getState().startScenario('sparkling-water')
+    useGameStore.getState().startScenario(mockScenario('sparkling-water'))
     expect(useGameStore.getState().currentScenarioId).toBe('sparkling-water')
   })
 
   it('resets currentTicketIndex to 0', () => {
-    useGameStore.getState().startScenario('sparkling-water')
+    useGameStore.getState().startScenario(mockScenario('sparkling-water'))
     expect(useGameStore.getState().currentTicketIndex).toBe(0)
   })
 
   it('resets the board to initial nodes and edges', () => {
-    useGameStore.getState().startScenario('sparkling-water')
+    useGameStore.getState().startScenario(mockScenario('sparkling-water'))
     const state = useGameStore.getState()
     expect(state.nodes).toEqual(INITIAL_NODES)
     expect(state.edges).toEqual(INITIAL_EDGES)
+  })
+
+  it('sets sidebarItems from the scenario definition', () => {
+    useGameStore.getState().startScenario(mockScenario('sparkling-water', ['waf', 'rds']))
+    expect(useGameStore.getState().sidebarItems).toHaveLength(2)
+    expect(useGameStore.getState().sidebarItems[0].serviceType).toBe('waf')
+  })
+
+  it('replaces existing sidebarItems when switching scenarios', () => {
+    useGameStore.setState({ sidebarItems: [{ serviceType: 'alb', label: 'ALB', iconSrc: '/aws-icons/alb.svg', tooltip: 'ALB' }] })
+    useGameStore.getState().startScenario(mockScenario('spooderman-api', ['lambda']))
+    expect(useGameStore.getState().sidebarItems).toHaveLength(1)
+    expect(useGameStore.getState().sidebarItems[0].serviceType).toBe('lambda')
   })
 })
 
@@ -101,46 +130,3 @@ describe('advanceTicket', () => {
   })
 })
 
-describe('setScenario', () => {
-  beforeEach(() => {
-    useGameStore.setState({ sidebarItems: [] })
-  })
-
-  it('sets sidebarItems from the scenario definition', () => {
-    const mockScenario = {
-      id: 'test-scenario',
-      title: 'Test',
-      description: 'Test scenario',
-      tickets: [],
-      answerNodes: [],
-      answerEdges: [],
-      sidebarItems: [
-        { serviceType: 'waf' as ServiceType, label: 'WAF', iconSrc: '/aws-icons/waf.svg', tooltip: 'WAF' },
-        { serviceType: 'rds' as ServiceType, label: 'RDS', iconSrc: '/aws-icons/rds.svg', tooltip: 'RDS' },
-      ],
-    }
-    useGameStore.getState().setScenario(mockScenario)
-    expect(useGameStore.getState().sidebarItems).toHaveLength(2)
-    expect(useGameStore.getState().sidebarItems[0].serviceType).toBe('waf')
-  })
-
-  it('replaces existing sidebarItems when scenario changes', () => {
-    useGameStore.setState({
-      sidebarItems: [{ serviceType: 'alb' as ServiceType, label: 'ALB', iconSrc: '/aws-icons/alb.svg', tooltip: 'ALB' }],
-    })
-    const mockScenario = {
-      id: 'test-scenario-2',
-      title: 'Test 2',
-      description: 'Test 2',
-      tickets: [],
-      answerNodes: [],
-      answerEdges: [],
-      sidebarItems: [
-        { serviceType: 'lambda' as ServiceType, label: 'Lambda', iconSrc: '/aws-icons/lambda.svg', tooltip: 'Lambda' },
-      ],
-    }
-    useGameStore.getState().setScenario(mockScenario)
-    expect(useGameStore.getState().sidebarItems).toHaveLength(1)
-    expect(useGameStore.getState().sidebarItems[0].serviceType).toBe('lambda')
-  })
-})

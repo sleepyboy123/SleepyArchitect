@@ -13,6 +13,8 @@ export type ServiceType =
   | 'alb'
   | 'api-gateway'
   | 'lambda'
+  | 'lambda-handler'
+  | 'lambda-worker'
   | 'dynamodb'
   | 'sqs'
   | 'cognito'
@@ -39,6 +41,7 @@ export interface ServiceNodeData extends Record<string, unknown> {
   iconSrc: string
   tooltip: string
   slotIndex: number
+  extraHandles?: HandleConfig[]
 }
 
 export interface SubnetNodeData extends Record<string, unknown> {

@@ -15,9 +15,10 @@ interface ResultModalProps {
   isLastTicket: boolean
   onNextTicket?: () => void
   onRetry: () => void
+  onResetScenario?: () => void
 }
 
-export function ResultModal({ result, isLastTicket, onNextTicket, onRetry }: ResultModalProps) {
+export function ResultModal({ result, isLastTicket, onNextTicket, onRetry, onResetScenario }: ResultModalProps) {
   const navigate = useNavigate()
 
   const title = result.passed && isLastTicket
@@ -65,7 +66,10 @@ export function ResultModal({ result, isLastTicket, onNextTicket, onRetry }: Res
           </Button>
           {result.passed && (
             isLastTicket
-              ? <Button onClick={() => { onNextTicket?.(); navigate('/') }}>Back to Scenarios</Button>
+              ? <>
+                  <Button variant="outline" onClick={onResetScenario}>Reset Scenario</Button>
+                  <Button onClick={() => { onNextTicket?.(); navigate('/') }}>Back to Scenarios</Button>
+                </>
               : <Button onClick={onNextTicket}>Next Ticket</Button>
           )}
         </div>

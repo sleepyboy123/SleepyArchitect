@@ -11,6 +11,11 @@ export type ServiceType =
   | 'nat'
   | 'rds'
   | 'alb'
+  | 'api-gateway'
+  | 'lambda'
+  | 'dynamodb'
+  | 'sqs'
+  | 'cognito'
 
 export interface HandleConfig {
   type: 'source' | 'target'

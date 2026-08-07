@@ -1,5 +1,5 @@
 import type { Node, Edge } from '@xyflow/react'
-import type { TrafficAnimationConfig } from '@/types/game'
+import type { TrafficAnimationConfig, SidebarItem } from '@/types/game'
 
 export type { TrafficAnimationConfig }
 
@@ -23,6 +23,7 @@ export interface ScenarioDefinition {
   tickets: Ticket[]
   answerNodes: Node[]
   answerEdges: Edge[]
+  sidebarItems: SidebarItem[]
 }
 
 export interface ValidationResult {

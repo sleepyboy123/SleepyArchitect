@@ -1,4 +1,5 @@
 import type { ScenarioDefinition } from '@/types/scenario'
+import { SIDEBAR_ITEMS } from '@/types/game'
 import { tickets } from './tickets'
 import { ANSWER_NODES, ANSWER_EDGES } from './answer'
 
@@ -9,4 +10,5 @@ export const sparklingWater: ScenarioDefinition = {
   tickets,
   answerNodes: ANSWER_NODES,
   answerEdges: ANSWER_EDGES,
+  sidebarItems: SIDEBAR_ITEMS,
 }

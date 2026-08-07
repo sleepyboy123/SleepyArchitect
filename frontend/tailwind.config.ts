@@ -61,10 +61,23 @@ export default {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        'ticket-enter': {
+          from: { transform: 'translateY(-100%)', opacity: '0' },
+          to: { transform: 'translateY(0)', opacity: '1' },
+        },
+        'badge-pop-fade': {
+          '0%':   { transform: 'scale(0)',    opacity: '0' },
+          '20%':  { transform: 'scale(1.15)', opacity: '1' },
+          '35%':  { transform: 'scale(1)',    opacity: '1' },
+          '80%':  { transform: 'scale(1)',    opacity: '1' },
+          '100%': { transform: 'scale(1)',    opacity: '0' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'ticket-enter': 'ticket-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'badge-pop-fade': 'badge-pop-fade 2s ease-out forwards',
       },
     },
   },

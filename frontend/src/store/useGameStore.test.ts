@@ -100,3 +100,47 @@ describe('advanceTicket', () => {
     expect(useGameStore.getState().currentTicketIndex).toBe(2)
   })
 })
+
+describe('setScenario', () => {
+  beforeEach(() => {
+    useGameStore.setState({ sidebarItems: [] })
+  })
+
+  it('sets sidebarItems from the scenario definition', () => {
+    const mockScenario = {
+      id: 'test-scenario',
+      title: 'Test',
+      description: 'Test scenario',
+      tickets: [],
+      answerNodes: [],
+      answerEdges: [],
+      sidebarItems: [
+        { serviceType: 'waf' as ServiceType, label: 'WAF', iconSrc: '/aws-icons/waf.svg', tooltip: 'WAF' },
+        { serviceType: 'rds' as ServiceType, label: 'RDS', iconSrc: '/aws-icons/rds.svg', tooltip: 'RDS' },
+      ],
+    }
+    useGameStore.getState().setScenario(mockScenario)
+    expect(useGameStore.getState().sidebarItems).toHaveLength(2)
+    expect(useGameStore.getState().sidebarItems[0].serviceType).toBe('waf')
+  })
+
+  it('replaces existing sidebarItems when scenario changes', () => {
+    useGameStore.setState({
+      sidebarItems: [{ serviceType: 'alb' as ServiceType, label: 'ALB', iconSrc: '/aws-icons/alb.svg', tooltip: 'ALB' }],
+    })
+    const mockScenario = {
+      id: 'test-scenario-2',
+      title: 'Test 2',
+      description: 'Test 2',
+      tickets: [],
+      answerNodes: [],
+      answerEdges: [],
+      sidebarItems: [
+        { serviceType: 'lambda' as ServiceType, label: 'Lambda', iconSrc: '/aws-icons/lambda.svg', tooltip: 'Lambda' },
+      ],
+    }
+    useGameStore.getState().setScenario(mockScenario)
+    expect(useGameStore.getState().sidebarItems).toHaveLength(1)
+    expect(useGameStore.getState().sidebarItems[0].serviceType).toBe('lambda')
+  })
+})

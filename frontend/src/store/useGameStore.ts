@@ -9,12 +9,14 @@ import {
   type Node,
   type Edge,
 } from '@xyflow/react'
-import type { ServiceNodeData, SubnetNodeData } from '@/types/game'
+import type { ServiceNodeData, SubnetNodeData, SidebarItem } from '@/types/game'
 import { INITIAL_NODES, INITIAL_EDGES, getSlotPosition } from '@/types/game'
+import type { ScenarioDefinition } from '@/types/scenario'
 
 interface GameStore {
   nodes: Node[]
   edges: Edge[]
+  sidebarItems: SidebarItem[]
   currentScenarioId: string | null
   currentTicketIndex: number
   addServiceNode: (node: Node) => void
@@ -26,12 +28,14 @@ interface GameStore {
   onConnect: (connection: Connection) => void
   splitEdge: (edgeId: string, newNodeId: string) => void
   startScenario: (scenarioId: string) => void
+  setScenario: (scenario: ScenarioDefinition) => void
   advanceTicket: () => void
 }
 
 export const useGameStore = create<GameStore>()((set, _get) => ({
   nodes: INITIAL_NODES,
   edges: INITIAL_EDGES,
+  sidebarItems: [],
   currentScenarioId: null,
   currentTicketIndex: 0,
 
@@ -131,6 +135,8 @@ export const useGameStore = create<GameStore>()((set, _get) => ({
     nodes: INITIAL_NODES,
     edges: INITIAL_EDGES,
   }),
+
+  setScenario: (scenario) => set({ sidebarItems: scenario.sidebarItems }),
 
   advanceTicket: () => set(state => ({
     currentTicketIndex: state.currentTicketIndex + 1,

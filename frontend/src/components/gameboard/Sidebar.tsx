@@ -1,19 +1,20 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
-import { SIDEBAR_ITEMS } from '@/types/game'
+import { useGameStore } from '@/store/useGameStore'
 import { SidebarItemTile } from './SidebarItem'
 import { cn } from '@/lib/utils'
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [query, setQuery] = useState('')
+  const sidebarItems = useGameStore(s => s.sidebarItems)
 
   const filtered = query.trim()
-    ? SIDEBAR_ITEMS.filter(item =>
+    ? sidebarItems.filter(item =>
         item.label.toLowerCase().includes(query.toLowerCase()) ||
         item.serviceType.toLowerCase().includes(query.toLowerCase())
       )
-    : SIDEBAR_ITEMS
+    : sidebarItems
 
   return (
     <aside

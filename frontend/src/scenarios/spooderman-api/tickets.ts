@@ -11,7 +11,7 @@ const STRUCTURAL_IDS = new Set(['internet', 'igw', 'internet-vpc', 'app-vpc', 'p
 export const tickets: Ticket[] = [
   {
     id: 'api-online',
-    message: 'hey rockstar, bossman has been vibecoding something out to track spooderman. he wants to put it out onto the web. haha get it?',
+    message: 'hey rockstar, bossman has been vibecoding something to track spooderman\'s location. he wants to put it out onto the web. haha get it?',
     validate(nodes, edges) {
       const gateways = getNodesOfType(nodes, 'api-gateway')
       const lambdas = getNodesOfType(nodes, 'lambda', 'lambda-handler', 'lambda-worker')
@@ -97,16 +97,6 @@ export const tickets: Ticket[] = [
         label: 'SageMaker is in the private subnet',
         check(nodes) {
           return getNodesOfType(nodes, 'sagemaker').some(n => n.parentId === 'private-subnet')
-        },
-      },
-      {
-        label: 'Handler Lambda calls SageMaker',
-        check(nodes, edges) {
-          const handlers = getNodesOfType(nodes, 'lambda-handler')
-          const sagemakers = getNodesOfType(nodes, 'sagemaker')
-          return sagemakers.some(sm =>
-            handlers.some(h => hasEdgeBetween(edges, h.id, sm.id))
-          )
         },
       },
     ],

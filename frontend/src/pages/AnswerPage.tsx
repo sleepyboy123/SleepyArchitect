@@ -1,5 +1,5 @@
 import { useParams, Navigate } from 'react-router-dom'
-import { ReactFlow, ReactFlowProvider, Background } from '@xyflow/react'
+import { ReactFlow, ReactFlowProvider, Background, ConnectionMode } from '@xyflow/react'
 import { ALL_SCENARIOS } from '@/scenarios'
 import { nodeTypes, edgeTypes } from '@/components/gameboard/canvas/FlowCanvas'
 
@@ -18,6 +18,7 @@ export function AnswerPage() {
           edgeTypes={edgeTypes}
           fitView
           fitViewOptions={{ padding: 0.15 }}
+          connectionMode={ConnectionMode.Loose}
           nodesDraggable={false}
           nodesConnectable={false}
           panOnDrag={false}

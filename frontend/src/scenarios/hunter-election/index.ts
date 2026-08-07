@@ -12,10 +12,10 @@ const sidebarItems: SidebarItem[] = [
   { serviceType: 'cloudwatch', label: 'CloudWatch', iconSrc: '/aws-icons/cloudwatch.svg', tooltip: 'AWS monitoring service. Tracks stream metrics (IteratorAge, throttles) and Lambda error rates.' },
 ]
 
-export const currentEvents: ScenarioDefinition = {
-  id: 'current-events',
-  title: 'Current Events',
-  description: 'Build a real-time data pipeline to ingest and process user engagement events at scale.',
+export const hunterElection: ScenarioDefinition = {
+  id: 'hunter-election',
+  title: 'Hunter Election',
+  description: 'The Hunter Chairman Election is live. Build a real-time data pipeline to capture, process, and archive the flood of engagement events.',
   tickets,
   answerNodes: ANSWER_NODES,
   answerEdges: ANSWER_EDGES,

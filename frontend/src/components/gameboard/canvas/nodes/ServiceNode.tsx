@@ -6,10 +6,8 @@ import { type ServiceNodeData } from '@/types/game'
 import { cn } from '@/lib/utils'
 
 export function ServiceNode({ id, data, selected }: NodeProps) {
-  const { label, iconSrc, tooltip, extraHandles } = data as ServiceNodeData
+  const { label, iconSrc, tooltip } = data as ServiceNodeData
   const removeNode = useGameStore(s => s.removeNode)
-
-  const extraBottomHandles = (extraHandles ?? []).filter(h => h.position === 'Bottom')
 
   return (
     <Tooltip>
@@ -38,25 +36,11 @@ export function ServiceNode({ id, data, selected }: NodeProps) {
             {label}
           </span>
 
-          {/* Standard handles */}
-          <Handle type="target" position={Position.Top} className="!bg-muted-foreground" />
-          <Handle type="target" position={Position.Left} id="left" className="!bg-muted-foreground" />
+          {/* Handles on all 4 sides - loose connection mode allows any-to-any */}
+          <Handle type="source" position={Position.Top} id="top" className="!bg-muted-foreground" />
+          <Handle type="source" position={Position.Left} id="left" className="!bg-muted-foreground" />
           <Handle type="source" position={Position.Right} id="right" className="!bg-muted-foreground" />
-
-          {/* Bottom handle(s) - data-driven via SIDEBAR_ITEMS extraHandles */}
-          {extraBottomHandles.length > 0
-            ? extraBottomHandles.map(h => (
-                <Handle
-                  key={h.id ?? h.position}
-                  type={h.type}
-                  position={Position[h.position]}
-                  id={h.id}
-                  style={h.style}
-                  className={h.colorClass}
-                />
-              ))
-            : <Handle type="source" position={Position.Bottom} className="!bg-muted-foreground" />
-          }
+          <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-muted-foreground" />
         </div>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-48 text-center">

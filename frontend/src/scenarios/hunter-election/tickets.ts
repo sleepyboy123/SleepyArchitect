@@ -8,7 +8,7 @@ import {
 export const tickets: Ticket[] = [
   {
     id: 'wire-up-stream',
-    message: "hey team, our app is generating thousands of engagement events every minute but we're just throwing them away. can you set up kinesis data streams so we can start capturing them?",
+    message: "hey rockstar, the hunter chairman election is underway. we are getting flooded by voting events every minute but we are just throwing them away. can you set up kinesis data streams so we can start capturing them?",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       if (kdsNodes.length === 0) return false
@@ -31,7 +31,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'add-processor',
-    message: "nice work! data is flowing in. now we need something to actually read and process those events. can you hook up a lambda function to consume from the stream?",
+    message: "nice work rockstar! voting events are flowing in. now we need something to actually read and process them. can you hook up a lambda function to consume from the stream?",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       const lambdas = getNodesOfType(nodes, 'lambda-processor')
@@ -58,7 +58,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'live-counters',
-    message: "the ceo wants a live dashboard showing read counts per article. can you connect lambda to dynamodb so we can store real-time aggregations?",
+    message: "hey rockstar, bossman wants a live dashboard showing all the voting details. can you connect lambda to dynamodb so we can store real-time aggregations?",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       const lambdas = getNodesOfType(nodes, 'lambda-processor')
@@ -87,7 +87,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'cold-storage',
-    message: "legal says we need to retain all raw events for 7 years. set up kinesis data firehose reading DIRECTLY from the stream and delivering to s3. don't route it through lambda - firehose can do this natively.",
+    message: "hey rockstar, legal says we need to retain all raw events for 7 years. set up kinesis data firehose reading DIRECTLY from the stream and delivering to s3. don't route it through lambda - firehose can do this natively.",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       const lambdas = getNodesOfType(nodes, 'lambda-processor')
@@ -134,7 +134,7 @@ export const tickets: Ticket[] = [
   {
     id: 'observability',
     trafficAnimation: { bubbleCount: 6, bubbleSpeed: 1.5 },
-    message: "we had a stream outage yesterday and didn't know for 2 hours. can you add cloudwatch so we can alarm on stream lag and lambda errors before customers notice?",
+    message: "hey rockstar, bad news... we had a stream outage yesterday and didn't know for 2 hours. can you add cloudwatch so we can alarm on stream lag and lambda errors before hunters notice?",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       const lambdas = getNodesOfType(nodes, 'lambda-processor')

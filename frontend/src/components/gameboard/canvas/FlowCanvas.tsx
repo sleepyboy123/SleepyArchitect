@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react'
-import { ReactFlow, ReactFlowProvider, Background, useReactFlow } from '@xyflow/react'
+import { ReactFlow, ReactFlowProvider, Background, useReactFlow, ConnectionMode } from '@xyflow/react'
 import type { Node, Edge, NodeChange } from '@xyflow/react'
 import { useGameStore } from '@/store/useGameStore'
 import { InternetNode } from './nodes/InternetNode'
@@ -343,6 +343,7 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
       onNodesChange={handleNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
+      connectionMode={ConnectionMode.Loose}
       onNodeDragStop={onNodeDragStop}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}

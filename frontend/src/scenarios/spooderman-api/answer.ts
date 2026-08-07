@@ -34,8 +34,13 @@ const SERVICE_NODES: Node[] = [
   },
   {
     id: 'ans-dynamodb', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
-    position: getSlotPosition(3), draggable: false,
-    data: { serviceType: 'dynamodb', label: 'DynamoDB', iconSrc: '/aws-icons/dynamodb.svg', tooltip: 'NoSQL database', slotIndex: 3 },
+    position: getSlotPosition(7), draggable: false,
+    data: { serviceType: 'dynamodb', label: 'DynamoDB', iconSrc: '/aws-icons/dynamodb.svg', tooltip: 'NoSQL database', slotIndex: 7 },
+  },
+  {
+    id: 'ans-sagemaker', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
+    position: getSlotPosition(9), draggable: false,
+    data: { serviceType: 'sagemaker', label: 'SageMaker', iconSrc: '/aws-icons/sagemaker.svg', tooltip: 'ML inference endpoint', slotIndex: 9 },
   },
 ]
 
@@ -47,6 +52,7 @@ const SERVICE_EDGES: Edge[] = [
   { id: 'ans-lambda-handler-to-ans-sqs', source: 'ans-lambda-handler', target: 'ans-sqs', type: 'trafficEdge' },
   { id: 'ans-sqs-to-ans-lambda-worker', source: 'ans-sqs', target: 'ans-lambda-worker', type: 'trafficEdge' },
   { id: 'ans-lambda-handler-to-ans-dynamodb', source: 'ans-lambda-handler', target: 'ans-dynamodb', type: 'trafficEdge' },
+  { id: 'ans-lambda-worker-to-ans-sagemaker', source: 'ans-lambda-worker', target: 'ans-sagemaker', type: 'trafficEdge' },
 ]
 
 export const ANSWER_NODES: Node[] = [
@@ -55,7 +61,7 @@ export const ANSWER_NODES: Node[] = [
       return { ...n, data: { ...n.data, occupiedSlots: { 0: 'ans-waf', 1: 'ans-cognito', 2: 'ans-apigw' } } }
     }
     if (n.id === 'private-subnet') {
-      return { ...n, data: { ...n.data, occupiedSlots: { 0: 'ans-lambda-handler', 1: 'ans-sqs', 2: 'ans-lambda-worker', 3: 'ans-dynamodb' } } }
+      return { ...n, data: { ...n.data, occupiedSlots: { 0: 'ans-lambda-handler', 1: 'ans-sqs', 2: 'ans-lambda-worker', 7: 'ans-dynamodb', 9: 'ans-sagemaker' } } }
     }
     return n
   }),

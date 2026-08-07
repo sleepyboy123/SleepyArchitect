@@ -17,6 +17,7 @@ export type ServiceType =
   | 'lambda-worker'
   | 'dynamodb'
   | 'sqs'
+  | 'sagemaker'
   | 'cognito'
 
 export interface HandleConfig {

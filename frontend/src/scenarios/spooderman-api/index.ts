@@ -9,6 +9,7 @@ const sidebarItems: SidebarItem[] = [
   { serviceType: 'lambda-worker', label: 'Worker Lambda', iconSrc: '/aws-icons/lambda.svg', tooltip: 'Handles long-running or compute-intensive tasks in the background, independently of the original caller' },
   { serviceType: 'dynamodb', label: 'DynamoDB', iconSrc: '/aws-icons/dynamodb.svg', tooltip: 'Managed NoSQL database - fast, flexible, serverless-native' },
   { serviceType: 'sqs', label: 'SQS', iconSrc: '/aws-icons/sqs.svg', tooltip: 'Simple Queue Service - decouples components with managed message queuing' },
+  { serviceType: 'sagemaker', label: 'SageMaker', iconSrc: '/aws-icons/sagemaker.svg', tooltip: 'Managed ML inference - call a deployed model endpoint to run predictions' },
   { serviceType: 'cognito', label: 'Cognito', iconSrc: '/aws-icons/cognito.svg', tooltip: 'Managed user authentication and authorisation' },
   { serviceType: 'waf', label: 'WAF', iconSrc: '/aws-icons/waf.svg', tooltip: 'Web Application Firewall - filters and monitors HTTP traffic' },
 ]

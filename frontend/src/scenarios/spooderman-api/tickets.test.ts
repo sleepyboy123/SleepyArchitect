@@ -49,8 +49,8 @@ describe('ticket 1 - api-online', () => {
   })
 })
 
-describe('ticket 4 - async-processing', () => {
-  const ticket = tickets[3]
+describe('ticket 5 - async-processing', () => {
+  const ticket = tickets[4]
 
   const fullSetup = (extraNodes: Node[], extraEdges: Edge[]) => {
     const nodes = [
@@ -90,18 +90,20 @@ describe('ticket 4 - async-processing', () => {
     expect(result).toBe(false)
   })
 
-  it('passes with handler lambda sending to SQS and worker lambda receiving from SQS', () => {
+  it('passes with handler lambda sending to SQS and worker lambda receiving from SQS and calling SageMaker', () => {
     const result = fullSetup(
       [
         makeService('lambda1', 'lambda-handler', 'private-subnet'),
         makeService('sqs1', 'sqs', 'private-subnet'),
         makeService('lambda2', 'lambda-worker', 'private-subnet'),
+        makeService('sm1', 'sagemaker', 'private-subnet'),
       ],
       [
         edge('apigw', 'lambda1'),
         edge('lambda1', 'sqs1'),
         edge('sqs1', 'lambda2'),
         edge('lambda1', 'dynamodb1'),
+        edge('lambda2', 'sm1'),
       ],
     )
     expect(result).toBe(true)

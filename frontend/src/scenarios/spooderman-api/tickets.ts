@@ -30,7 +30,7 @@ export const tickets: Ticket[] = [
       {
         label: 'Lambda is in the private subnet',
         check(nodes) {
-          return getNodesOfType(nodes, 'lambda').some(n => n.parentId === 'private-subnet')
+          return getNodesOfType(nodes, 'lambda', 'lambda-handler', 'lambda-worker').some(n => n.parentId === 'private-subnet')
         },
       },
     ],
@@ -82,21 +82,55 @@ export const tickets: Ticket[] = [
     ],
   },
   {
+    id: 'ml-inference',
+    message: "hey rockstar, bossman wants to get onto that ai hype train. he keeps telling me how spooderman can stop a train? i don't quite get it...",
+    validate(nodes, edges) {
+      const sagemakers = getNodesOfType(nodes, 'sagemaker')
+      const lambdas = getNodesOfType(nodes, 'lambda-handler', 'lambda-worker')
+      if (sagemakers.length === 0 || lambdas.length === 0) return false
+      return sagemakers.some(sm =>
+        lambdas.some(l => hasEdgeBetween(edges, l.id, sm.id))
+      )
+    },
+    objectives: [
+      {
+        label: 'SageMaker is in the private subnet',
+        check(nodes) {
+          return getNodesOfType(nodes, 'sagemaker').some(n => n.parentId === 'private-subnet')
+        },
+      },
+      {
+        label: 'Handler Lambda calls SageMaker',
+        check(nodes, edges) {
+          const handlers = getNodesOfType(nodes, 'lambda-handler')
+          const sagemakers = getNodesOfType(nodes, 'sagemaker')
+          return sagemakers.some(sm =>
+            handlers.some(h => hasEdgeBetween(edges, h.id, sm.id))
+          )
+        },
+      },
+    ],
+  },
+  {
     id: 'async-processing',
     trafficAnimation: { bubbleCount: 8, bubbleSpeed: 1.2 },
-    message: 'hey rockstar, some people have been complaining that their requests have been timing out? maybe your lambda is doing too much at once. Maybe we can split it? One lambda to respond to the request, one lambda to do the actual work and a queue in the middle to make sure nothing is lost.',
+    message: 'hey rockstar, some people have been complaining that their requests have been timing out? maybe our lambda is doing too much at once. Maybe we can split it? One lambda to respond to the request, one lambda to do the actual work and a queue in the middle to make sure nothing is lost.',
     validate(nodes, edges) {
       const sqsList = getNodesOfType(nodes, 'sqs')
       const handlers = getNodesOfType(nodes, 'lambda-handler')
       const workers = getNodesOfType(nodes, 'lambda-worker')
-      if (sqsList.length === 0 || handlers.length === 0 || workers.length === 0) return false
+      const sagemakers = getNodesOfType(nodes, 'sagemaker')
+      if (sqsList.length === 0 || handlers.length === 0 || workers.length === 0 || sagemakers.length === 0) return false
       const hasProducer = sqsList.some(sqs =>
         handlers.some(h => edges.some(e => e.source === h.id && e.target === sqs.id))
       )
       const hasConsumer = sqsList.some(sqs =>
         workers.some(w => edges.some(e => e.source === sqs.id && e.target === w.id))
       )
-      return hasProducer && hasConsumer
+      const workerCallsSagemaker = sagemakers.some(sm =>
+        workers.some(w => hasEdgeBetween(edges, w.id, sm.id))
+      )
+      return hasProducer && hasConsumer && workerCallsSagemaker
     },
     objectives: [
       {
@@ -122,6 +156,16 @@ export const tickets: Ticket[] = [
           const sqsList = getNodesOfType(nodes, 'sqs')
           return sqsList.some(sqs =>
             workers.some(w => edges.some(e => e.source === sqs.id && e.target === w.id))
+          )
+        },
+      },
+      {
+        label: 'Worker Lambda calls SageMaker',
+        check(nodes, edges) {
+          const workers = getNodesOfType(nodes, 'lambda-worker')
+          const sagemakers = getNodesOfType(nodes, 'sagemaker')
+          return sagemakers.some(sm =>
+            workers.some(w => hasEdgeBetween(edges, w.id, sm.id))
           )
         },
       },

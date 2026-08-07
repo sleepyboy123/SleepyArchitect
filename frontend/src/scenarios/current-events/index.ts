@@ -1,6 +1,6 @@
 import type { ScenarioDefinition } from '@/types/scenario'
 import type { SidebarItem } from '@/types/game'
-import type { Ticket } from '@/types/scenario'
+import { tickets } from './tickets'
 import { ANSWER_NODES, ANSWER_EDGES } from './answer'
 
 const sidebarItems: SidebarItem[] = [
@@ -12,21 +12,11 @@ const sidebarItems: SidebarItem[] = [
   { serviceType: 'cloudwatch', label: 'CloudWatch', iconSrc: '/aws-icons/cloudwatch.svg', tooltip: 'AWS monitoring service. Tracks stream metrics (IteratorAge, throttles) and Lambda error rates.' },
 ]
 
-// Placeholder ticket — replaced in Task 5 with the full import from ./tickets
-const stubTickets: Ticket[] = [
-  {
-    id: 'wire-up-stream',
-    message: "hey team, our app is generating thousands of engagement events every minute but we're just throwing them away. can you set up kinesis data streams so we can start capturing them?",
-    validate: () => false,
-    objectives: [],
-  },
-]
-
 export const currentEvents: ScenarioDefinition = {
   id: 'current-events',
   title: 'Current Events',
   description: 'Build a real-time data pipeline to ingest and process user engagement events at scale.',
-  tickets: stubTickets,
+  tickets,
   answerNodes: ANSWER_NODES,
   answerEdges: ANSWER_EDGES,
   sidebarItems,

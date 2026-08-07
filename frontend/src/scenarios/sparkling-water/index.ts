@@ -20,7 +20,7 @@ const sidebarItems: SidebarItem[] = [
 
 export const sparklingWater: ScenarioDefinition = {
   id: 'sparkling-water',
-  title: 'The Sparkling Water Co.',
+  title: 'Sparkling Secret',
   description: 'Help bossman get his sparkling water empire online, one ticket at a time.',
   tickets,
   answerNodes: ANSWER_NODES,

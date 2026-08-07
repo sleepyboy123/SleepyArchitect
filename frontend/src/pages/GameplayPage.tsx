@@ -28,6 +28,7 @@ export function GameplayPage() {
   const startScenario = useGameStore(s => s.startScenario)
   const advanceTicket = useGameStore(s => s.advanceTicket)
   const clearBoard = useGameStore(s => s.clearBoard)
+  const setScenario = useGameStore(s => s.setScenario)
 
   const [result, setResult] = useState<ValidationResult | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
@@ -40,6 +41,11 @@ export function GameplayPage() {
       startScenario(scenarioId)
     }
   }, [scenarioId, currentScenarioId, currentTicketIndex, scenario, startScenario])
+
+  useEffect(() => {
+    if (!scenario) return
+    setScenario(scenario)
+  }, [scenario, setScenario])
 
   if (!scenario) return <Navigate to="/" replace />
 

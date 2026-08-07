@@ -41,6 +41,7 @@ const SERVICE_EDGES: Edge[] = [
   { id: 'ans-lambda-to-ans-dynamodb', source: 'ans-lambda', target: 'ans-dynamodb', type: 'trafficEdge' },
   { id: 'ans-firehose-to-ans-s3', source: 'ans-firehose', target: 'ans-s3', type: 'trafficEdge' },
   { id: 'ans-kds-to-ans-cloudwatch', source: 'ans-kds', target: 'ans-cloudwatch', type: 'trafficEdge' },
+  { id: 'ans-lambda-to-ans-cloudwatch', source: 'ans-lambda', target: 'ans-cloudwatch', type: 'trafficEdge' },
 ]
 
 export const ANSWER_NODES: Node[] = [

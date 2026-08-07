@@ -32,7 +32,7 @@ Build the foundation that all subsequent tasks depend on: copy the four new AWS 
 **Interfaces:**
 - Produces: `ServiceType` variants `'kinesis-data-streams' | 'kinesis-firehose' | 'lambda-processor' | 's3' | 'cloudwatch'` — Tasks 2 and 5 reference these exact strings in `serviceType` fields.
 
-- [ ] **Step 1: Copy the four icons**
+- [x] **Step 1: Copy the four icons**
 
 Run from the project root (`/Users/matthew/Desktop/aws-architect-game`):
 
@@ -43,7 +43,7 @@ cp "aws-icon-packages/Architecture-Service-Icons_04302026/Arch_Storage/32/Arch_A
 cp "aws-icon-packages/Architecture-Service-Icons_04302026/Arch_Management-Tools/32/Arch_Amazon-CloudWatch_32.svg" frontend/public/aws-icons/cloudwatch.svg
 ```
 
-- [ ] **Step 2: Verify icons were copied**
+- [x] **Step 2: Verify icons were copied**
 
 ```bash
 ls frontend/public/aws-icons/ | grep -E "kinesis|firehose|s3|cloudwatch"
@@ -51,7 +51,7 @@ ls frontend/public/aws-icons/ | grep -E "kinesis|firehose|s3|cloudwatch"
 
 Expected: four filenames printed — `cloudwatch.svg`, `firehose.svg`, `kinesis-data-streams.svg`, `s3.svg`.
 
-- [ ] **Step 3: Add new ServiceTypes to `game.ts`**
+- [x] **Step 3: Add new ServiceTypes to `game.ts`**
 
 Current union in `frontend/src/types/game.ts` (lines 4–20):
 ```ts
@@ -100,7 +100,7 @@ export type ServiceType =
   | 'cloudwatch'
 ```
 
-- [ ] **Step 4: Verify TypeScript compiles**
+- [x] **Step 4: Verify TypeScript compiles**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -108,7 +108,7 @@ cd frontend && npx tsc --noEmit
 
 Expected: no errors. If errors appear, they are pre-existing (check `git diff HEAD -- src/types/game.ts` to confirm only the union changed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add frontend/public/aws-icons/kinesis-data-streams.svg \
@@ -144,7 +144,7 @@ Private subnet:  [slot 0] Lambda Processor   [slot 1] DynamoDB
 
 Edges: `igw → kds`, `kds → lambda`, `kds → firehose` (fan-out), `lambda → dynamodb`, `firehose → s3`, `kds → cloudwatch`.
 
-- [ ] **Step 1: Create `frontend/src/scenarios/current-events/answer.ts`**
+- [x] **Step 1: Create `frontend/src/scenarios/current-events/answer.ts`**
 
 ```ts
 import type { Node, Edge } from '@xyflow/react'
@@ -208,7 +208,7 @@ export const ANSWER_NODES: Node[] = [
 export const ANSWER_EDGES: Edge[] = [...INITIAL_EDGES, ...SERVICE_EDGES]
 ```
 
-- [ ] **Step 2: Create `frontend/src/scenarios/current-events/index.ts`**
+- [x] **Step 2: Create `frontend/src/scenarios/current-events/index.ts`**
 
 This uses a single inline ticket stub so the scenario is playable. Task 5 replaces it with the real import.
 
@@ -248,7 +248,7 @@ export const currentEvents: ScenarioDefinition = {
 }
 ```
 
-- [ ] **Step 3: Register the scenario in `frontend/src/scenarios/index.ts`**
+- [x] **Step 3: Register the scenario in `frontend/src/scenarios/index.ts`**
 
 Replace the entire file with:
 
@@ -265,7 +265,7 @@ export const ALL_SCENARIOS: Record<string, ScenarioDefinition> = {
 }
 ```
 
-- [ ] **Step 4: Verify the answer page renders correctly**
+- [x] **Step 4: Verify the answer page renders correctly**
 
 ```bash
 cd frontend && npm run dev
@@ -282,7 +282,7 @@ cd frontend && npm run dev
 6. Verify edges are visible: two edges from KDS (fan-out to Lambda and Firehose), Lambda → DynamoDB, Firehose → S3, KDS → CloudWatch.
 7. Verify all AWS icons render (not broken image icons).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add frontend/src/scenarios/current-events/ frontend/src/scenarios/index.ts
@@ -688,6 +688,7 @@ export const tickets: Ticket[] = [
       if (!kdsNodes.some(kds => firehoses.some(fh => hasEdgeBetween(edges, kds.id, fh.id)))) return false
       if (lambdas.some(l => firehoses.some(fh => hasEdgeBetween(edges, l.id, fh.id)))) return false
       if (!firehoses.some(fh => s3Nodes.some(s3 => hasEdgeBetween(edges, fh.id, s3.id)))) return false
+      // Only KDS → CloudWatch is required to pass; Lambda → CloudWatch is a bonus objective
       return kdsNodes.some(kds => cwNodes.some(cw => hasEdgeBetween(edges, kds.id, cw.id)))
     },
     objectives: [
@@ -703,6 +704,14 @@ export const tickets: Ticket[] = [
           const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
           const cwNodes = getNodesOfType(nodes, 'cloudwatch')
           return kdsNodes.some(kds => cwNodes.some(cw => hasEdgeBetween(edges, kds.id, cw.id)))
+        },
+      },
+      {
+        label: '(Bonus) Lambda Processor is also connected to CloudWatch',
+        check(nodes, edges) {
+          const lambdas = getNodesOfType(nodes, 'lambda-processor')
+          const cwNodes = getNodesOfType(nodes, 'cloudwatch')
+          return lambdas.some(l => cwNodes.some(cw => hasEdgeBetween(edges, l.id, cw.id)))
         },
       },
     ],

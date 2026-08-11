@@ -8,7 +8,7 @@ import {
 export const tickets: Ticket[] = [
   {
     id: 'wire-up-stream',
-    message: "hey rockstar, the hunter chairman election is underway. we are getting flooded by voting events every minute but we are just throwing them away. can you set up kinesis data streams so we can start capturing them?",
+    message: "hey rockstar, bossman has installed IoT sensors on every sparkling water dispenser in the office. every time someone presses the button it fires an event. right now we are just throwing them away. can you set up kinesis data streams so we can start capturing them?",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       if (kdsNodes.length === 0) return false
@@ -31,7 +31,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'add-processor',
-    message: "nice work rockstar! voting events are flowing in. now we need something to actually read and process them. can you hook up a lambda function to consume from the stream?",
+    message: "nice work rockstar! hydration events are flowing. now we need something to actually read and process them. can you hook up a lambda function to consume from the stream? bossman says this data is SENSITIVE. private subnet only.",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       const lambdas = getNodesOfType(nodes, 'lambda-processor')
@@ -58,7 +58,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'live-counters',
-    message: "hey rockstar, bossman wants a live dashboard showing all the voting details. can you connect lambda to dynamodb so we can store real-time aggregations?",
+    message: "hey rockstar, bossman has decided that the most hydrated developer gets a prize every friday. he needs a LIVE LEADERBOARD. can you connect lambda to dynamodb so we can store real-time consumption counts per developer?",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       const lambdas = getNodesOfType(nodes, 'lambda-processor')
@@ -87,7 +87,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'cold-storage',
-    message: "hey rockstar, legal says we need to retain all raw events for 7 years. set up kinesis data firehose reading DIRECTLY from the stream and delivering to s3. don't route it through lambda - firehose can do this natively.",
+    message: "hey rockstar, legal just told bossman we need to keep ALL sparkling water records for 7 years. every sip. raw and unfiltered. set up kinesis data firehose reading DIRECTLY from the stream and delivering to s3. don't route it through lambda - firehose can do this natively.",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       const lambdas = getNodesOfType(nodes, 'lambda-processor')
@@ -134,7 +134,7 @@ export const tickets: Ticket[] = [
   {
     id: 'observability',
     trafficAnimation: { bubbleCount: 6, bubbleSpeed: 1.5 },
-    message: "hey rockstar, bad news... we had a stream outage yesterday and didn't know for 2 hours. can you add cloudwatch so we can alarm on stream lag and lambda errors before hunters notice?",
+    message: "rockstar. bad news. the stream went down yesterday and we had a 2 hour gap in hydration data. bossman does not know if they were drinking. he is not okay. can you add cloudwatch so we can alarm on stream lag and lambda errors IMMEDIATELY if this ever happens again?",
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       const lambdas = getNodesOfType(nodes, 'lambda-processor')

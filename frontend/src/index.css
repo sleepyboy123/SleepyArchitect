@@ -77,3 +77,29 @@
   }
 }
 
+/*
+ * Push service node handles fully outside the node boundary so they have a large
+ * hit area without overlapping the draggable card area. Each handle's transform is
+ * overridden so its inner edge aligns with the node edge rather than straddling it.
+ */
+.service-node-handle.react-flow__handle-top {
+  width: 20px !important;
+  height: 10px !important;
+  transform: translate(-50%, -100%) !important;
+}
+.service-node-handle.react-flow__handle-bottom {
+  width: 20px !important;
+  height: 10px !important;
+  transform: translate(-50%, 100%) !important;
+}
+.service-node-handle.react-flow__handle-left {
+  width: 10px !important;
+  height: 20px !important;
+  transform: translate(-100%, -50%) !important;
+}
+.service-node-handle.react-flow__handle-right {
+  width: 10px !important;
+  height: 20px !important;
+  transform: translate(100%, -50%) !important;
+}
+

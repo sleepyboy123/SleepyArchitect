@@ -37,27 +37,11 @@ export function ServiceNode({ id, data, selected }: NodeProps) {
           </span>
 
           {/* Handles on all 4 sides - loose connection mode allows any-to-any */}
-          {/* 20x20 hit area makes handles much easier to grab; fade in on node hover */}
-          <Handle
-            type="source" position={Position.Top} id="top"
-            style={{ width: 20, height: 20 }}
-            className="!bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-70 !transition-opacity !duration-150"
-          />
-          <Handle
-            type="source" position={Position.Left} id="left"
-            style={{ width: 20, height: 20 }}
-            className="!bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-70 !transition-opacity !duration-150"
-          />
-          <Handle
-            type="source" position={Position.Right} id="right"
-            style={{ width: 20, height: 20 }}
-            className="!bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-70 !transition-opacity !duration-150"
-          />
-          <Handle
-            type="source" position={Position.Bottom} id="bottom"
-            style={{ width: 20, height: 20 }}
-            className="!bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-70 !transition-opacity !duration-150"
-          />
+          {/* Positioned fully outside the node via CSS so they never interfere with node dragging */}
+          <Handle type="source" position={Position.Top} id="top" className="service-node-handle !bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-60 !transition-opacity !duration-150" />
+          <Handle type="source" position={Position.Left} id="left" className="service-node-handle !bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-60 !transition-opacity !duration-150" />
+          <Handle type="source" position={Position.Right} id="right" className="service-node-handle !bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-60 !transition-opacity !duration-150" />
+          <Handle type="source" position={Position.Bottom} id="bottom" className="service-node-handle !bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-60 !transition-opacity !duration-150" />
         </div>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-48 text-center">

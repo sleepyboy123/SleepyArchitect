@@ -16,34 +16,34 @@ const SERVICE_NODES: Node[] = [
   {
     id: 'ans-kds', type: 'serviceNode', parentId: 'public-subnet', extent: 'parent',
     position: getSlotPosition(1), draggable: false,
-    data: { serviceType: 'kinesis-data-streams', label: 'Kinesis Data Streams', iconSrc: '/aws-icons/kinesis-data-streams.svg', tooltip: 'Managed real-time data stream', slotIndex: 1 },
+    data: { serviceType: 'kinesis-data-streams', label: 'Kinesis Data Streams', iconSrc: '/aws-icons/kinesis-data-streams.svg', tooltip: 'Captures every sparkling water dispense event in real time', slotIndex: 1 },
   },
   {
     // col 0, row 0 — to the left of Lambda, receives Lambda's left→right edge
     id: 'ans-dynamodb', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
     position: getSlotPosition(0), draggable: false,
-    data: { serviceType: 'dynamodb', label: 'DynamoDB', iconSrc: '/aws-icons/dynamodb.svg', tooltip: 'Real-time counter storage', slotIndex: 0 },
+    data: { serviceType: 'dynamodb', label: 'DynamoDB', iconSrc: '/aws-icons/dynamodb.svg', tooltip: 'Live hydration leaderboard - updated per batch by Lambda', slotIndex: 0 },
   },
   {
     // col 1, row 0 — directly below KDS
     id: 'ans-lambda', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
     position: getSlotPosition(1), draggable: false,
-    data: { serviceType: 'lambda-processor', label: 'Lambda Processor', iconSrc: '/aws-icons/lambda.svg', tooltip: 'Stream consumer and processor', slotIndex: 1 },
+    data: { serviceType: 'lambda-processor', label: 'Lambda Processor', iconSrc: '/aws-icons/lambda.svg', tooltip: 'Reads dispense event batches and updates per-developer sip counts', slotIndex: 1 },
   },
   {
     id: 'ans-cloudwatch', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
     position: getSlotPosition(2), draggable: false,
-    data: { serviceType: 'cloudwatch', label: 'CloudWatch', iconSrc: '/aws-icons/cloudwatch.svg', tooltip: 'Stream and Lambda monitoring', slotIndex: 2 },
+    data: { serviceType: 'cloudwatch', label: 'CloudWatch', iconSrc: '/aws-icons/cloudwatch.svg', tooltip: 'Alarms on stream lag and Lambda errors so bossman always knows if they were drinking', slotIndex: 2 },
   },
   {
     id: 'ans-firehose', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
     position: getSlotPosition(3), draggable: false,
-    data: { serviceType: 'kinesis-firehose', label: 'Data Firehose', iconSrc: '/aws-icons/firehose.svg', tooltip: 'Managed delivery stream to S3', slotIndex: 3 },
+    data: { serviceType: 'kinesis-firehose', label: 'Data Firehose', iconSrc: '/aws-icons/firehose.svg', tooltip: 'Delivers raw dispense events directly to S3 - no Lambda needed', slotIndex: 3 },
   },
   {
     id: 'ans-s3', type: 'serviceNode', parentId: 'private-subnet', extent: 'parent',
     position: getSlotPosition(4), draggable: false,
-    data: { serviceType: 's3', label: 'S3', iconSrc: '/aws-icons/s3.svg', tooltip: 'Data lake for archived events', slotIndex: 4 },
+    data: { serviceType: 's3', label: 'S3', iconSrc: '/aws-icons/s3.svg', tooltip: '7 years of raw sparkling water records, as required by legal', slotIndex: 4 },
   },
 ]
 

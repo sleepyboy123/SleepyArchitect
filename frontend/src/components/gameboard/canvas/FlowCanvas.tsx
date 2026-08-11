@@ -417,6 +417,7 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       connectionMode={ConnectionMode.Loose}
+      connectionRadius={30}
       onNodeDragStop={onNodeDragStop}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}

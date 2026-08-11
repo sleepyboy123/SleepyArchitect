@@ -22,6 +22,7 @@ interface GameStore {
   addServiceNode: (node: Node) => void
   removeNode: (nodeId: string) => void
   moveNodeToSlot: (nodeId: string, newSlotIndex: number) => void
+  moveNodeToSubnet: (nodeId: string, newSubnetId: string, newSlotIndex: number) => void
   clearBoard: () => void
   resetScenario: () => void
   onNodesChange: (changes: NodeChange[]) => void
@@ -110,6 +111,50 @@ export const useGameStore = create<GameStore>()((set, _get) => ({
         return n
       })
       return { nodes: updatedNodes }
+    })
+  },
+
+  moveNodeToSubnet: (nodeId, newSubnetId, newSlotIndex) => {
+    set(state => {
+      const node = state.nodes.find(n => n.id === nodeId)
+      if (!node) return state
+      const oldSubnetId = node.parentId
+      const oldSlotIndex = (node.data as ServiceNodeData).slotIndex
+
+      const updatedNodes = state.nodes.map(n => {
+        if (n.id === nodeId) {
+          return {
+            ...n,
+            parentId: newSubnetId,
+            position: getSlotPosition(newSlotIndex),
+            data: { ...n.data, slotIndex: newSlotIndex },
+          }
+        }
+        if (n.id === oldSubnetId && oldSlotIndex !== undefined && oldSlotIndex !== -1) {
+          const slots = { ...(n.data as SubnetNodeData).occupiedSlots }
+          delete slots[oldSlotIndex]
+          return { ...n, data: { ...n.data, occupiedSlots: slots } }
+        }
+        if (n.id === newSubnetId) {
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              occupiedSlots: {
+                ...(n.data as SubnetNodeData).occupiedSlots,
+                [newSlotIndex]: nodeId,
+              },
+            },
+          }
+        }
+        return n
+      })
+
+      const updatedEdges = state.edges.filter(
+        e => e.source !== nodeId && e.target !== nodeId
+      )
+
+      return { nodes: updatedNodes, edges: updatedEdges }
     })
   },
 

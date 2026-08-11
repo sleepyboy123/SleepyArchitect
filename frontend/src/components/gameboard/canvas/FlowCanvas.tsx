@@ -177,6 +177,38 @@ function resolveSubnetDrop(
   return null
 }
 
+// Like resolveSubnetDrop but does NOT reject occupied slots.
+// Used by onNodeDragStop so it can decide what to do with an occupied target.
+function resolveSubnetSlot(
+  flowPos: { x: number; y: number },
+  allNodes: Node[],
+): SubnetDropResult | null {
+  for (const subnetId of SUBNET_IDS) {
+    const subnetNode = allNodes.find(n => n.id === subnetId)
+    if (!subnetNode) continue
+
+    const absPos = getAbsoluteNodePosition(subnetId, allNodes)
+
+    if (
+      flowPos.x >= absPos.x &&
+      flowPos.x <= absPos.x + SUBNET_WIDTH &&
+      flowPos.y >= absPos.y &&
+      flowPos.y <= absPos.y + SUBNET_HEIGHT
+    ) {
+      const relX = flowPos.x - absPos.x
+      const relY = flowPos.y - absPos.y
+      const col = Math.floor((relX - SLOT_START_X) / SLOT_WIDTH)
+      const row = Math.floor((relY - SLOT_START_Y) / SLOT_HEIGHT)
+
+      if (col < 0 || col >= SLOTS_PER_ROW || row < 0 || row > 1) return null
+
+      const slotIndex = row * SLOTS_PER_ROW + col
+      return { subnetId, slotIndex }
+    }
+  }
+  return null
+}
+
 interface FlowCanvasProps {
   animateAllEdges?: boolean
   trafficAnimation?: TrafficAnimationConfig
@@ -224,6 +256,7 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
   const addServiceNode = useGameStore(s => s.addServiceNode)
   const splitEdge = useGameStore(s => s.splitEdge)
   const moveNodeToSlot = useGameStore(s => s.moveNodeToSlot)
+  const moveNodeToSubnet = useGameStore(s => s.moveNodeToSubnet)
 
   // Tracks which React Flow edge (by id) the cursor is directly over during a drag.
   // Populated via React Flow's official onEdgeMouseEnter/Leave events - no DOM coupling.
@@ -232,25 +265,51 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
   const onNodeDragStop = useCallback((_event: MouseEvent | TouchEvent, node: Node) => {
     if (node.type !== 'serviceNode') return
     const allNodes = useGameStore.getState().nodes
-    const subnetNode = allNodes.find(n => n.id === node.parentId)
-    if (!subnetNode) return
-
-    const col = Math.round((node.position.x - SLOT_START_X) / SLOT_WIDTH)
-    const row = Math.round((node.position.y - SLOT_START_Y) / SLOT_HEIGHT)
-    const clampedCol = Math.max(0, Math.min(SLOTS_PER_ROW - 1, col))
-    const clampedRow = Math.max(0, Math.min(1, row))
-    const newSlotIndex = clampedRow * SLOTS_PER_ROW + clampedCol
-
     const oldSlotIndex = (node.data as ServiceNodeData).slotIndex
-    const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
 
-    if (newSlotIndex in occupied && occupied[newSlotIndex] !== node.id) {
+    const absolutePos = getAbsoluteNodePosition(node.id, allNodes)
+    const result = resolveSubnetSlot(absolutePos, allNodes)
+
+    if (!result) {
+      // Dropped outside any valid subnet slot - snap back
       moveNodeToSlot(node.id, oldSlotIndex)
       return
     }
 
-    moveNodeToSlot(node.id, newSlotIndex)
-  }, [moveNodeToSlot])
+    if (result.subnetId !== node.parentId) {
+      // Cross-subnet move: find a free slot in the target subnet
+      const targetSubnetNode = allNodes.find(n => n.id === result.subnetId)
+      if (!targetSubnetNode) {
+        moveNodeToSlot(node.id, oldSlotIndex)
+        return
+      }
+      const occupied = (targetSubnetNode.data as SubnetNodeData).occupiedSlots
+      let targetSlot = result.slotIndex
+      if (targetSlot in occupied) {
+        // Exact drop slot is taken - find first free slot in target subnet
+        const totalSlots = SLOTS_PER_ROW * 2
+        const freeSlot = Array.from({ length: totalSlots }, (_, i) => i).find(i => !(i in occupied))
+        if (freeSlot === undefined) {
+          // Target subnet is full - snap back
+          moveNodeToSlot(node.id, oldSlotIndex)
+          return
+        }
+        targetSlot = freeSlot
+      }
+      moveNodeToSubnet(node.id, result.subnetId, targetSlot)
+    } else {
+      // Intra-subnet move
+      const subnetNode = allNodes.find(n => n.id === node.parentId)
+      if (!subnetNode) return
+      const occupied = (subnetNode.data as SubnetNodeData).occupiedSlots
+      if (result.slotIndex in occupied && occupied[result.slotIndex] !== node.id) {
+        // Target slot is occupied by another node - snap back
+        moveNodeToSlot(node.id, oldSlotIndex)
+        return
+      }
+      moveNodeToSlot(node.id, result.slotIndex)
+    }
+  }, [moveNodeToSlot, moveNodeToSubnet])
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -301,7 +360,7 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
               addServiceNode({
                 id: nodeId, type: 'serviceNode',
                 position: getSlotPosition(result.insertSlot),
-                parentId: targetNode.parentId, extent: 'parent', draggable: true,
+                parentId: targetNode.parentId, draggable: true,
                 data: { serviceType, label, iconSrc, tooltip, slotIndex: result.insertSlot, extraHandles },
               })
               splitEdge(edge.id, nodeId)
@@ -329,7 +388,7 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
       addServiceNode({
         id: nodeId, type: 'serviceNode',
         position: getSlotPosition(subnetDrop.slotIndex),
-        parentId: subnetDrop.subnetId, extent: 'parent', draggable: true,
+        parentId: subnetDrop.subnetId, draggable: true,
         data: { serviceType, label, iconSrc, tooltip, slotIndex: subnetDrop.slotIndex, extraHandles },
       })
     }

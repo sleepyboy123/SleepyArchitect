@@ -18,9 +18,13 @@ export const tickets: Ticket[] = [
     },
     objectives: [
       {
-        label: 'Frontend is in the public subnet',
+        label: 'Frontend is in the correct subnet (EC2: public, ECS: private)',
         check(nodes) {
-          return getNodesOfType(nodes, 'frontend-ec2', 'frontend-ecs').some(f => f.parentId === 'public-subnet')
+          const ec2s = getNodesOfType(nodes, 'frontend-ec2')
+          const ecss = getNodesOfType(nodes, 'frontend-ecs')
+          if (ec2s.length > 0) return ec2s.some(f => f.parentId === 'public-subnet')
+          if (ecss.length > 0) return ecss.some(f => f.parentId === 'private-subnet')
+          return false
         },
       },
       {
@@ -45,9 +49,13 @@ export const tickets: Ticket[] = [
     },
     objectives: [
       {
-        label: 'Frontend is in the public subnet',
+        label: 'Frontend is in the correct subnet (EC2: public, ECS: private)',
         check(nodes) {
-          return getNodesOfType(nodes, 'frontend-ec2', 'frontend-ecs').some(f => f.parentId === 'public-subnet')
+          const ec2s = getNodesOfType(nodes, 'frontend-ec2')
+          const ecss = getNodesOfType(nodes, 'frontend-ecs')
+          if (ec2s.length > 0) return ec2s.some(f => f.parentId === 'public-subnet')
+          if (ecss.length > 0) return ecss.some(f => f.parentId === 'private-subnet')
+          return false
         },
       },
       {
@@ -108,6 +116,12 @@ export const tickets: Ticket[] = [
           return getNodesOfType(nodes, 'alb').some(a => a.parentId === 'public-subnet')
         },
       },
+      {
+        label: 'Frontend is in the private subnet',
+        check(nodes) {
+          return getNodesOfType(nodes, 'frontend-ec2', 'frontend-ecs').some(f => f.parentId === 'private-subnet')
+        },
+      },
     ],
   },
   {
@@ -137,6 +151,30 @@ export const tickets: Ticket[] = [
         label: 'WAF is the first service after IGW',
         check(nodes, edges) {
           return getNodesOfType(nodes, 'waf').some(w => hasEdgeBetween(edges, 'igw', w.id))
+        },
+      },
+    ],
+  },
+  {
+    id: 'cdn',
+    message: "hey rockstar, bossman is getting a bit delulu... he thinks that people all around the world wants to visit his site...",
+    validate(nodes, edges) {
+      const cloudfronts = getNodesOfType(nodes, 'cloudfront')
+      if (cloudfronts.length === 0) return false
+      return cloudfronts.some(cf =>
+        hasEdgeBetween(edges, 'internet', cf.id) &&
+        hasEdgeBetween(edges, cf.id, 'igw')
+      )
+    },
+    objectives: [
+      {
+        label: 'CloudFront sits between the internet and IGW',
+        check(nodes, edges) {
+          const cloudfronts = getNodesOfType(nodes, 'cloudfront')
+          return cloudfronts.some(cf =>
+            hasEdgeBetween(edges, 'internet', cf.id) &&
+            hasEdgeBetween(edges, cf.id, 'igw')
+          )
         },
       },
     ],

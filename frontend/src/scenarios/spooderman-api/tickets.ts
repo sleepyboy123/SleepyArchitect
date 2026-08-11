@@ -55,7 +55,7 @@ export const tickets: Ticket[] = [
   },
   {
     id: 'auth',
-    message: 'hey rockstar, apparently the sinister six have been using this platform to track spooderman. who would have thought. we should do something about that',
+    message: 'hey rockstar, apparently the sinister six have been using this platform to track spooderman. who would have thought. maybe we should add some login functionality?',
     validate(nodes, edges) {
       const cognitos = getNodesOfType(nodes, 'cognito')
       const gateways = getNodesOfType(nodes, 'api-gateway')

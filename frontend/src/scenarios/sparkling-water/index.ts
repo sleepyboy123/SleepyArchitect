@@ -16,12 +16,13 @@ const sidebarItems: SidebarItem[] = [
   { serviceType: 'nat', label: 'NAT Gateway', iconSrc: '/aws-icons/nat.svg', tooltip: 'Enables private subnet resources to reach the internet' },
   { serviceType: 'rds', label: 'RDS', iconSrc: '/aws-icons/rds.svg', tooltip: 'Managed relational database service' },
   { serviceType: 'alb', label: 'ALB', iconSrc: '/aws-icons/alb.svg', tooltip: 'Application Load Balancer - distributes incoming traffic across targets' },
+  { serviceType: 'cloudfront', label: 'CloudFront + WAF', iconSrc: '/aws-icons/cloudfront.svg', tooltip: 'CloudFront CDN with WAF at the edge - sits outside the VPC between the internet and IGW' },
 ]
 
 export const sparklingWater: ScenarioDefinition = {
   id: 'sparkling-water',
   title: 'Sparkling Secret',
-  description: 'Help bossman get his sparkling water empire online, one ticket at a time.',
+  description: 'Bossman has been eating too many three-tiered cakes. Now he wants to put it in his architecture?',
   tickets,
   answerNodes: ANSWER_NODES,
   answerEdges: ANSWER_EDGES,

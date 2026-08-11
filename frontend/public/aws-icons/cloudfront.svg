@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <rect width="80" height="80" rx="8" fill="#8C4FFF"/>
+  <!-- Cloud body -->
+  <path d="M54 42c0-7.73-6.27-14-14-14-6.44 0-11.88 4.34-13.53 10.26C23.07 38.79 20 42.22 20 46.5 20 51.75 24.25 56 29.5 56H54c4.42 0 8-3.58 8-8s-3.58-8-8-8z" fill="white" opacity="0.95"/>
+  <!-- Distribution lines fanning out downward -->
+  <line x1="40" y1="56" x2="28" y2="68" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="40" y1="56" x2="40" y2="70" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="40" y1="56" x2="52" y2="68" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

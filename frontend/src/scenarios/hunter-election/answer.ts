@@ -60,8 +60,8 @@ const SERVICE_EDGES: Edge[] = [
   { id: 'ans-kds-to-ans-cloudwatch', source: 'ans-kds', sourceHandle: 'bottom', target: 'ans-cloudwatch', targetHandle: 'top', type: 'trafficEdge' },
   // Lambda left → DynamoDB right (rightward arrow going leftward)
   { id: 'ans-lambda-to-ans-dynamodb', source: 'ans-lambda', sourceHandle: 'left', target: 'ans-dynamodb', targetHandle: 'right', type: 'trafficEdge' },
-  // CloudWatch bottom → Lambda bottom (bottom-to-bottom arc)
-  { id: 'ans-cloudwatch-to-ans-lambda', source: 'ans-cloudwatch', sourceHandle: 'bottom', target: 'ans-lambda', targetHandle: 'bottom', type: 'trafficEdge' },
+  // Lambda right → CloudWatch left (Lambda emits metrics/logs to CloudWatch)
+  { id: 'ans-lambda-to-ans-cloudwatch', source: 'ans-lambda', sourceHandle: 'right', target: 'ans-cloudwatch', targetHandle: 'left', type: 'trafficEdge' },
 ]
 
 export const ANSWER_NODES: Node[] = [

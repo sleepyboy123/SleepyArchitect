@@ -17,12 +17,14 @@ import {
   SLOT_HEIGHT,
   SUBNET_WIDTH,
   SUBNET_HEIGHT,
+  CLOUDFRONT_SNAP_POSITION,
   getSlotPosition,
   type SubnetNodeData,
   type ServiceNodeData,
 } from '@/types/game'
 
 const SUBNET_IDS = ['public-subnet', 'private-subnet']
+
 
 function getAbsoluteNodePosition(nodeId: string, allNodes: Node[]): { x: number; y: number } {
   const node = allNodes.find(n => n.id === nodeId)
@@ -368,6 +370,18 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
             }
           }
         }
+        // CloudFront snaps to a fixed position between the Internet node and IGW
+        if (edge.id === 'internet-to-igw' && serviceType === 'cloudfront') {
+          addServiceNode({
+            id: nodeId, type: 'serviceNode',
+            position: CLOUDFRONT_SNAP_POSITION,
+            draggable: true,
+            data: { serviceType, label, iconSrc, tooltip, slotIndex: -1, extraHandles },
+          })
+          splitEdge(edge.id, nodeId, { incomingTarget: 'left', outgoingSource: 'right' })
+          return
+        }
+
         // Geometric midpoint fallback (target not in subnet, or subnet full)
         const srcAbs = getAbsoluteNodePosition(edge.source, allNodes)
         const tgtAbs = getAbsoluteNodePosition(edge.target, allNodes)

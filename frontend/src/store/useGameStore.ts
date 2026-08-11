@@ -28,7 +28,7 @@ interface GameStore {
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
   onConnect: (connection: Connection) => void
-  splitEdge: (edgeId: string, newNodeId: string) => void
+  splitEdge: (edgeId: string, newNodeId: string, handles?: { incomingTarget?: string; outgoingSource?: string; outgoingTarget?: string }) => void
   startScenario: (scenario: ScenarioDefinition) => void
   advanceTicket: () => void
 }
@@ -188,14 +188,14 @@ export const useGameStore = create<GameStore>()((set, _get) => ({
     currentTicketIndex: state.currentTicketIndex + 1,
   })),
 
-  splitEdge: (edgeId, newNodeId) => {
+  splitEdge: (edgeId, newNodeId, handles) => {
     set(state => {
       const edge = state.edges.find(e => e.id === edgeId)
       if (!edge) return state
       const remaining = state.edges.filter(e => e.id !== edgeId)
       const newEdges: Edge[] = [
-        { id: `${edge.source}-to-${newNodeId}`, source: edge.source, target: newNodeId, type: 'trafficEdge' },
-        { id: `${newNodeId}-to-${edge.target}`, source: newNodeId, target: edge.target, type: 'trafficEdge' },
+        { id: `${edge.source}-to-${newNodeId}`, source: edge.source, target: newNodeId, type: 'trafficEdge', targetHandle: handles?.incomingTarget },
+        { id: `${newNodeId}-to-${edge.target}`, source: newNodeId, target: edge.target, type: 'trafficEdge', sourceHandle: handles?.outgoingSource, targetHandle: handles?.outgoingTarget },
       ]
       return { edges: [...remaining, ...newEdges] }
     })

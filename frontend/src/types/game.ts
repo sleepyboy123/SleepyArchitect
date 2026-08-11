@@ -24,6 +24,7 @@ export type ServiceType =
   | 'lambda-processor'
   | 's3'
   | 'cloudwatch'
+  | 'cloudfront'
 
 export interface HandleConfig {
   type: 'source' | 'target'
@@ -73,6 +74,9 @@ export type AppNode = Node<ServiceNodeData, 'serviceNode'>
   | Node<Record<string, unknown>, 'igwNode'>
 
 export type AppEdge = Edge
+
+// Fixed canvas position for CloudFront - floats outside the VPC in the gap between the Internet node and internet-vpc
+export const CLOUDFRONT_SNAP_POSITION = { x: 135, y: 268 }
 
 // Slot grid constants
 export const SLOTS_PER_ROW = 7

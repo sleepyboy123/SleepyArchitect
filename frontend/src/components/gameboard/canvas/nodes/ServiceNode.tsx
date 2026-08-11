@@ -14,7 +14,7 @@ export function ServiceNode({ id, data, selected }: NodeProps) {
       <TooltipTrigger asChild>
         <div
           className={cn(
-            'relative flex flex-col items-center justify-center gap-1 p-2 rounded-md border bg-card shadow-sm select-none w-16 h-[82px]',
+            'group relative flex flex-col items-center justify-center gap-1 p-2 rounded-md border bg-card shadow-sm select-none w-16 h-[82px]',
             selected && 'border-primary ring-1 ring-primary',
             !selected && 'border-border'
           )}
@@ -37,10 +37,27 @@ export function ServiceNode({ id, data, selected }: NodeProps) {
           </span>
 
           {/* Handles on all 4 sides - loose connection mode allows any-to-any */}
-          <Handle type="source" position={Position.Top} id="top" className="!bg-muted-foreground" />
-          <Handle type="source" position={Position.Left} id="left" className="!bg-muted-foreground" />
-          <Handle type="source" position={Position.Right} id="right" className="!bg-muted-foreground" />
-          <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-muted-foreground" />
+          {/* 20x20 hit area makes handles much easier to grab; fade in on node hover */}
+          <Handle
+            type="source" position={Position.Top} id="top"
+            style={{ width: 20, height: 20 }}
+            className="!bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-70 !transition-opacity !duration-150"
+          />
+          <Handle
+            type="source" position={Position.Left} id="left"
+            style={{ width: 20, height: 20 }}
+            className="!bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-70 !transition-opacity !duration-150"
+          />
+          <Handle
+            type="source" position={Position.Right} id="right"
+            style={{ width: 20, height: 20 }}
+            className="!bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-70 !transition-opacity !duration-150"
+          />
+          <Handle
+            type="source" position={Position.Bottom} id="bottom"
+            style={{ width: 20, height: 20 }}
+            className="!bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-70 !transition-opacity !duration-150"
+          />
         </div>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-48 text-center">

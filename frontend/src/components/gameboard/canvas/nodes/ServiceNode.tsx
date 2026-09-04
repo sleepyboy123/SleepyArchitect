@@ -44,7 +44,7 @@ export function ServiceNode({ id, data, selected }: NodeProps) {
           <Handle type="source" position={Position.Bottom} id="bottom" className="service-node-handle !bg-muted-foreground !rounded-full !opacity-0 group-hover:!opacity-60 !transition-opacity !duration-150" />
         </div>
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-48 text-center">
+      <TooltipContent side="top" sideOffset={14} className="max-w-48 text-center pointer-events-none">
         <p className="text-xs">{tooltip}</p>
       </TooltipContent>
     </Tooltip>

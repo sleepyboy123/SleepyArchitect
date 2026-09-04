@@ -25,6 +25,11 @@ export type ServiceType =
   | 's3'
   | 'cloudwatch'
   | 'cloudfront'
+  | 'glue-crawler'
+  | 'glue-job'
+  | 'athena'
+  | 'quicksight'
+  | 'eventbridge'
 
 export interface HandleConfig {
   type: 'source' | 'target'

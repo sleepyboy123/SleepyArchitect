@@ -15,7 +15,7 @@ const sidebarItems: SidebarItem[] = [
 export const hydrationInitiative: ScenarioDefinition = {
   id: 'hydration-initiative',
   title: 'The Hydration Initiative',
-  description: "Bossman wants to analyse the companies hydration analytics.",
+  description: "Bossman wants to analyse the company's hydration analytics.",
   tickets,
   answerNodes: ANSWER_NODES,
   answerEdges: ANSWER_EDGES,

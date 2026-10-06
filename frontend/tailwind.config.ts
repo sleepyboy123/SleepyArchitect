@@ -62,15 +62,14 @@ export default {
           to: { height: '0' },
         },
         'ticket-enter': {
-          from: { transform: 'translateY(-100%)', opacity: '0' },
+          from: { transform: 'translateY(-24px)', opacity: '0' },
           to: { transform: 'translateY(0)', opacity: '1' },
         },
         'badge-pop-fade': {
           '0%':   { transform: 'scale(0)',    opacity: '0' },
           '20%':  { transform: 'scale(1.15)', opacity: '1' },
           '35%':  { transform: 'scale(1)',    opacity: '1' },
-          '80%':  { transform: 'scale(1)',    opacity: '1' },
-          '100%': { transform: 'scale(1)',    opacity: '0' },
+          '100%': { transform: 'scale(1)',    opacity: '1' },
         },
       },
       animation: {

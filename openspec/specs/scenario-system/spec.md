@@ -53,9 +53,13 @@ It is the single entry point for beginning a scenario - no separate `setScenario
 The first failure stops evaluation.
 Every ticket's requirements implicitly include all prior tickets.
 
+When a previous ticket (index `i < ticketIndex`) fails, `submitDesign` returns that ticket's objectives (not the current ticket's) and sets `failedTicketIndex: number` on `ValidationResult` so the UI can show which ticket regressed.
+
 ## Scenarios
 
 | Slug | Title | Tickets |
 |------|-------|---------|
-| `sparkling-water` | Sparkling Secret | 5 - classic VPC web app (EC2/ECS, ALB, ASG, WAF, NAT, RDS) |
-| `spooderman-api` | Spooderman API | 5 - serverless API (API Gateway, Lambda, DynamoDB, SQS, Cognito, WAF) |
+| `sparkling-water` | Sparkling Secret | 6 - classic VPC web app (EC2/ECS, ALB, ASG, WAF, CloudFront, RDS) |
+| `spooderman-api` | Spooderman API | 6 - serverless API (API Gateway, Lambda, DynamoDB, SQS, Cognito, WAF) |
+| `hydration-initiative` | The Hydration Initiative | 5 - real-time data pipeline (Kinesis, Firehose, Lambda, DynamoDB, S3, CloudWatch) |
+| `data-lake-analytics` | The Data Lake | 5 - data lake analytics (S3, Glue, Athena, QuickSight, EventBridge) |

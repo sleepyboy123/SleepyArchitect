@@ -18,77 +18,181 @@ You can always try again after seeing your results - optional objectives hint at
 docker compose up
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3003`.
 
 There is no backend.
 The game is a fully client-side React SPA.
+
+Alternatively, without Docker:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ## Project Structure
 
 ```
 frontend/
   src/
-    pages/           # Route-level components (Home, Gameplay, Answer)
+    pages/                  # Route-level components
+      ScenarioSelectPage.tsx    # Scenario picker (renders cards from ALL_SCENARIOS)
+      GameplayPage.tsx          # Gameplay canvas + sidebar + ticket banner
+      AnswerPage.tsx            # Read-only reference architecture viewer
     components/
-      gameboard/     # Ticket banner, sidebar, result modal
-        canvas/      # React Flow canvas, node/edge types
-    scenarios/       # Game content lives here
-      sparkling-water/   # The first scenario
-        tickets.ts   # Ticket definitions and validators
-        answer.ts    # Reference architecture for /answer/:id
-      index.ts       # Scenario registry (add new scenarios here)
-      engine.ts      # Cumulative validation logic
-    store/           # Zustand game state
-    types/           # Shared TypeScript types
+      gameboard/             # Ticket banner, sidebar, result modal
+        canvas/              # React Flow canvas, node/edge types
+      ui/                    # shadcn/ui primitives (button, card, tooltip, etc.)
+    scenarios/               # Game content lives here
+      sparkling-water/       # Scenario 1: three-tier web architecture
+      spooderman-api/        # Scenario 2: serverless API with Lambda, API Gateway, SQS
+      hydration-initiative/  # Scenario 3: Kinesis data pipeline with real-time processing
+      data-lake-analytics/   # Scenario 4: S3 data lake with Glue, Athena, QuickSight
+      validation/
+        utils.ts             # Shared validation helpers (getNodesOfType, hasEdgeBetween, etc.)
+      index.ts               # Scenario registry (ALL_SCENARIOS map)
+      engine.ts              # Cumulative validation logic
+    store/
+      useGameStore.ts        # Zustand game state (nodes, edges, sidebar, ticket index)
+    types/
+      game.ts                # ServiceType union, SidebarItem, slot grid constants
+      scenario.ts            # Ticket, Objective, ScenarioDefinition, ValidationResult
 ```
+
+## Scenarios
+
+| # | Slug | Title | What it teaches |
+|---|------|-------|-----------------|
+| 1 | `sparkling-water` | Sparkling Secret | Classic three-tier web architecture: EC2, ALB, RDS, ASG, CloudFront, WAF |
+| 2 | `spooderman-api` | Spooderman API | Serverless API: API Gateway, Lambda, DynamoDB, SQS, Cognito |
+| 3 | `hydration-initiative` | The Hydration Initiative | Real-time data pipeline: Kinesis Data Streams, Firehose, Lambda, DynamoDB, S3, CloudWatch |
+| 4 | `data-lake-analytics` | The Data Lake | S3 data lake pipeline: Glue Crawler, Glue Job, Athena, QuickSight, EventBridge |
 
 ## Adding a New Scenario
 
-1. Create `src/scenarios/<your-scenario>/` with two files:
-   - `tickets.ts` - exports an array of `Ticket` objects (id, message, validate, objectives, optional trafficAnimation)
-   - `answer.ts` - exports `ANSWER_NODES` and `ANSWER_EDGES` for the `/answer/:id` reference page
+1. Create `src/scenarios/<your-scenario>/` with three files:
 
-2. Register it in `src/scenarios/index.ts`:
+   **`tickets.ts`** - exports a `Ticket[]` array with validators and objectives:
    ```ts
-   import { ANSWER_NODES, ANSWER_EDGES } from './your-scenario/answer'
-   import { TICKETS } from './your-scenario/tickets'
+   import type { Ticket } from '@/types/scenario'
+   import { getNodesOfType, hasEdgeBetween, isReachableFromIgw } from '@/scenarios/validation/utils'
 
-   export const ALL_SCENARIOS: Record<string, ScenarioDefinition> = {
-     'your-scenario': {
-       id: 'your-scenario',
-       title: 'Your Title',
-       description: 'One sentence description',
-       tickets: TICKETS,
-       answerNodes: ANSWER_NODES,
-       answerEdges: ANSWER_EDGES,
+   export const tickets: Ticket[] = [
+     {
+       id: 'first-ticket',
+       message: "What Bossman says - no hints!",
+       validate(nodes, edges) {
+         // Return true when the player's design satisfies this ticket
+         const myNodes = getNodesOfType(nodes, 'my-service-type')
+         return myNodes.length > 0
+       },
+       objectives: [
+         {
+           label: 'My service is in the private subnet',
+           check(nodes) {
+             return getNodesOfType(nodes, 'my-service-type').some(n => n.parentId === 'private-subnet')
+           },
+         },
+       ],
      },
-     // ...existing scenarios
+   ]
+   ```
+
+   **`answer.ts`** - exports `ANSWER_NODES` and `ANSWER_EDGES` for the `/answer/:scenarioId` reference page.
+
+   **`index.ts`** - wires everything together and defines the sidebar:
+   ```ts
+   import type { ScenarioDefinition } from '@/types/scenario'
+   import type { SidebarItem } from '@/types/game'
+   import { tickets } from './tickets'
+   import { ANSWER_NODES, ANSWER_EDGES } from './answer'
+
+   const sidebarItems: SidebarItem[] = [
+     {
+       serviceType: 'my-service-type',
+       label: 'My Service',
+       iconSrc: '/aws-icons/my-service.svg',
+       tooltip: 'Description shown on hover in the sidebar',
+     },
+   ]
+
+   export const myScenario: ScenarioDefinition = {
+     id: 'my-scenario',
+     title: 'My Scenario',
+     description: 'One sentence shown on the scenario select card.',
+     tickets,
+     answerNodes: ANSWER_NODES,
+     answerEdges: ANSWER_EDGES,
+     sidebarItems,
    }
    ```
 
-3. Add a card for it in `src/pages/HomePage.tsx`.
+2. Register it in `src/scenarios/index.ts`:
+   ```ts
+   import { myScenario } from './my-scenario'
+
+   export const ALL_SCENARIOS: Record<string, ScenarioDefinition> = {
+     // ...existing scenarios
+     [myScenario.id]: myScenario,
+   }
+   ```
+
+3. If your scenario uses new AWS service types, add them to the `ServiceType` union in `src/types/game.ts` and place the corresponding icon SVGs in `frontend/public/aws-icons/`.
 
 That is all.
+The scenario select page renders cards automatically from `ALL_SCENARIOS`.
 The validation engine, traffic animation, cumulative checking, and result modal all work with any scenario automatically.
 
-## Ticket Shape
+## Key Types
 
 ```ts
 interface Ticket {
   id: string
-  message: string                                           // What Bossman says - no hints!
-  validate: (nodes: Node[], edges: Edge[]) => boolean      // Pass/fail logic
-  objectives: Objective[]                                   // Optional best-practice checks
-  trafficAnimation?: {
-    bubbleCount?: number    // default 3
-    bubbleColor?: string    // default primary brand colour
-    bubbleSpeed?: number    // seconds per loop, default 2
-  }
+  message: string                                       // What Bossman says
+  validate: (nodes: Node[], edges: Edge[]) => boolean   // Pass/fail logic
+  objectives: Objective[]                               // Checklist items shown in the result modal
+  trafficAnimation?: TrafficAnimationConfig             // Override bubble count/color/speed
+}
+
+interface Objective {
+  label: string
+  check: (nodes: Node[], edges: Edge[]) => boolean
+}
+
+interface ScenarioDefinition {
+  id: string
+  title: string
+  description: string
+  tickets: Ticket[]
+  answerNodes: Node[]
+  answerEdges: Edge[]
+  sidebarItems: SidebarItem[]
+}
+
+interface SidebarItem {
+  serviceType: ServiceType
+  label: string
+  iconSrc: string
+  tooltip: string
+  extraHandles?: HandleConfig[]   // For nodes like ASG that need multiple connection points
 }
 ```
 
+## Validation Helpers
+
+Shared helpers in `src/scenarios/validation/utils.ts` cover common checks:
+
+| Helper | What it does |
+|--------|-------------|
+| `getNodesOfType(nodes, ...types)` | Filter nodes by `ServiceType` |
+| `getNodesInSubnet(nodes, subnetId)` | Filter service nodes by parent subnet |
+| `hasEdgeBetween(edges, idA, idB)` | Check for a direct edge in either direction |
+| `hasPathBetween(nodes, edges, src, tgt)` | BFS reachability check (bidirectional edges) |
+| `isReachableFromIgw(nodes, edges, targetId)` | Shorthand for `hasPathBetween` from `'igw'` |
+
 Validators receive the full React Flow node and edge arrays.
-Use the helper functions in `src/scenarios/sparkling-water/validation/utils.ts` as a starting point - they cover common checks like "does a node of type X exist", "is there an edge between X and Y", and "is a node inside subnet Z".
+Both `validate()` and objective `check()` functions should verify subnet placement via `node.parentId` - not just connectivity - to ensure nodes are in the correct subnet.
 
 ## Cumulative Validation
 
@@ -116,6 +220,8 @@ Constants in `src/types/game.ts` control the layout:
 `SUBNET_WIDTH` and `SUBNET_HEIGHT` are derived automatically.
 Changing `SLOTS_PER_ROW` widens both subnets and the VPC proportionally.
 
+Nodes like CloudFront that float outside the VPC have a fixed snap position defined in `CLOUDFRONT_SNAP_POSITION`.
+
 ## Traffic Animation
 
 When you hit Submit, animated bubble particles flow along every edge for two seconds before the result appears.
@@ -128,7 +234,7 @@ Ticket-level `trafficAnimation` config overrides the defaults per-ticket (e.g. r
 - React Flow (`@xyflow/react`) for the interactive canvas
 - Zustand for game state
 - React Router DOM v7 for routing
-- shadcn/ui + Tailwind CSS for UI components
+- shadcn/ui + Radix UI + Tailwind CSS for UI components and tooltips
 - Vitest for unit tests
 
 ## Tests
@@ -138,4 +244,4 @@ cd frontend
 npx vitest run
 ```
 
-Tests cover the validation utility functions and the Zustand store's node/slot management.
+Tests cover the validation utility functions, the Zustand store's node/slot management, the cumulative validation engine, and individual ticket validators for sparkling-water and spooderman-api scenarios.

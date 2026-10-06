@@ -91,11 +91,15 @@ export const tickets: Ticket[] = [
     validate(nodes, edges) {
       const albs = getNodesOfType(nodes, 'alb')
       const asgs = getNodesOfType(nodes, 'asg')
-      const computes = getNodesOfType(nodes, 'frontend-ec2', 'frontend-ecs', 'backend-ec2', 'backend-ecs')
+      const frontends = getNodesOfType(nodes, 'frontend-ec2', 'frontend-ecs')
+      const backends = getNodesOfType(nodes, 'backend-ec2', 'backend-ecs')
       if (albs.length === 0 || asgs.length === 0) return false
       const albToAsg = albs.some(alb => asgs.some(asg => hasEdgeBetween(edges, alb.id, asg.id)))
       if (!albToAsg) return false
-      return asgs.some(asg => computes.some(c => hasEdgeBetween(edges, asg.id, c.id)))
+      return asgs.some(asg =>
+        frontends.some(f => hasEdgeBetween(edges, asg.id, f.id)) &&
+        backends.some(b => hasEdgeBetween(edges, asg.id, b.id))
+      )
     },
     objectives: [
       {
@@ -131,9 +135,8 @@ export const tickets: Ticket[] = [
     validate(nodes, edges) {
       const wafs = getNodesOfType(nodes, 'waf')
       if (wafs.length === 0) return false
-      const wafReachable = wafs.some(waf => isReachableFromIgw(nodes, edges, waf.id))
-      if (!wafReachable) return false
       return wafs.some(waf =>
+        hasEdgeBetween(edges, 'igw', waf.id) &&
         edges.some(e => {
           const neighbor = e.source === waf.id ? e.target : e.target === waf.id ? e.source : null
           return neighbor !== null && !STRUCTURAL_IDS.has(neighbor)
@@ -161,6 +164,7 @@ export const tickets: Ticket[] = [
     validate(nodes, edges) {
       const cloudfronts = getNodesOfType(nodes, 'cloudfront')
       if (cloudfronts.length === 0) return false
+      if (hasEdgeBetween(edges, 'internet', 'igw')) return false
       return cloudfronts.some(cf =>
         hasEdgeBetween(edges, 'internet', cf.id) &&
         hasEdgeBetween(edges, cf.id, 'igw')

@@ -43,6 +43,12 @@ export function ResultModal({ result, isLastTicket, onNextTicket, onRetry, onRes
           </DialogDescription>
         </DialogHeader>
 
+        {!result.passed && result.failedTicketIndex !== undefined && (
+          <p className="text-sm text-amber-600 dark:text-amber-400 pb-1">
+            Ticket {result.failedTicketIndex + 1} requirements are no longer met.
+          </p>
+        )}
+
         {result.objectives.length > 0 && (
           <div className="space-y-2 py-2">
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">

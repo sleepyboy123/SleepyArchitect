@@ -13,10 +13,11 @@ export function submitDesign(
 
   for (let i = 0; i <= ticketIndex; i++) {
     if (!scenario.tickets[i].validate(nodes, edges)) {
-      const current = scenario.tickets[ticketIndex]
+      const failedTicket = scenario.tickets[i]
       return {
         passed: false,
-        objectives: current.objectives.map(obj => ({ label: obj.label, met: obj.check(nodes, edges) })),
+        objectives: failedTicket.objectives.map(obj => ({ label: obj.label, met: obj.check(nodes, edges) })),
+        failedTicketIndex: i < ticketIndex ? i : undefined,
       }
     }
   }

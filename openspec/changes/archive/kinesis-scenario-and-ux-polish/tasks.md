@@ -303,7 +303,7 @@ Add a slide-in-from-top animation and an animated "NEW" badge to `TicketBanner`.
 - Consumes: nothing from other tasks.
 - Produces: `animate-ticket-enter` and `animate-badge-pop-fade` Tailwind utility classes.
 
-- [ ] **Step 1: Add keyframes and animation utilities to `tailwind.config.ts`**
+- [x] **Step 1: Add keyframes and animation utilities to `tailwind.config.ts`**
 
 Current `keyframes` block (lines 55–63):
 ```ts
@@ -362,7 +362,7 @@ Replace with:
       },
 ```
 
-- [ ] **Step 2: Update `TicketBanner.tsx` — add slide animation and badge styling**
+- [x] **Step 2: Update `TicketBanner.tsx` — add slide animation and badge styling**
 
 Current outer div (line 13):
 ```tsx
@@ -386,7 +386,7 @@ Replace with (turns it into an animated amber pill badge):
             </span>
 ```
 
-- [ ] **Step 3: Verify the animation in the browser**
+- [x] **Step 3: Verify the animation in the browser**
 
 With the dev server running (`npm run dev` in `frontend/`):
 
@@ -396,7 +396,7 @@ With the dev server running (`npm run dev` in `frontend/`):
 4. A small amber "NEW" pill should pop into view next to "Bossman", then fade out over ~2 seconds.
 5. Confirm no layout shift — the banner should not push content down during the animation (it slides into its already-reserved space).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add frontend/tailwind.config.ts frontend/src/components/gameboard/TicketBanner.tsx
@@ -416,7 +416,7 @@ Replace the native `title` attribute on `SidebarItemTile` with a Radix `Tooltip`
 - Consumes: nothing from other tasks.
 - Produces: Radix `Tooltip` on each sidebar tile, appearing to the right on hover with a 300ms delay.
 
-- [ ] **Step 1: Update `SidebarItem.tsx` to use Radix Tooltip**
+- [x] **Step 1: Update `SidebarItem.tsx` to use Radix Tooltip**
 
 Current file (`frontend/src/components/gameboard/SidebarItem.tsx`):
 ```tsx
@@ -501,7 +501,7 @@ export function SidebarItemTile({ item }: SidebarItemProps) {
 }
 ```
 
-- [ ] **Step 2: Verify the tooltip in the browser**
+- [x] **Step 2: Verify the tooltip in the browser**
 
 With the dev server running:
 
@@ -512,7 +512,7 @@ With the dev server running:
 5. Confirm that dragging a tile still works (the `TooltipTrigger asChild` passes through drag events).
 6. Confirm no native browser `title` tooltip appears (the old `title=` attribute was removed).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add frontend/src/components/gameboard/SidebarItem.tsx
@@ -533,7 +533,7 @@ Create all five tickets with validators and update `current-events/index.ts` to 
 - Consumes: `ServiceType` variants `'kinesis-data-streams'`, `'kinesis-firehose'`, `'lambda-processor'`, `'s3'`, `'cloudwatch'` from Task 1; `getNodesOfType`, `hasEdgeBetween`, `isReachableFromIgw` from `@/scenarios/validation/utils`.
 - Produces: `tickets` array exported from `current-events/tickets.ts` — 5 `Ticket` objects with `id`, `message`, `validate()`, and `objectives[]`.
 
-- [ ] **Step 1: Create `frontend/src/scenarios/current-events/tickets.ts`**
+- [x] **Step 1: Create `frontend/src/scenarios/current-events/tickets.ts`**
 
 ```ts
 import type { Ticket } from '@/types/scenario'
@@ -719,7 +719,7 @@ export const tickets: Ticket[] = [
 ]
 ```
 
-- [ ] **Step 2: Update `frontend/src/scenarios/current-events/index.ts`** — replace the stub with the real import
+- [x] **Step 2: Update `frontend/src/scenarios/current-events/index.ts`** — replace the stub with the real import
 
 Replace the entire file with:
 
@@ -749,7 +749,7 @@ export const currentEvents: ScenarioDefinition = {
 }
 ```
 
-- [ ] **Step 3: Verify the full scenario plays end-to-end**
+- [x] **Step 3: Verify the full scenario plays end-to-end**
 
 With the dev server running:
 
@@ -761,7 +761,7 @@ With the dev server running:
 6. Add CloudWatch to the private subnet. Connect KDS → CloudWatch. Submit — should pass ticket 5 and show the final result modal.
 7. Navigate to the answer page and confirm the canvas matches what you built.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add frontend/src/scenarios/current-events/tickets.ts \

@@ -29,4 +29,5 @@ export interface ScenarioDefinition {
 export interface ValidationResult {
   passed: boolean
   objectives: { label: string; met: boolean }[]
+  failedTicketIndex?: number
 }

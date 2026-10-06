@@ -266,6 +266,7 @@ function FlowCanvasInner({ animateAllEdges = false, trafficAnimation }: FlowCanv
 
   const onNodeDragStop = useCallback((_event: MouseEvent | TouchEvent, node: Node) => {
     if (node.type !== 'serviceNode') return
+    if (!node.parentId) return
     const allNodes = useGameStore.getState().nodes
     const oldSlotIndex = (node.data as ServiceNodeData).slotIndex
 

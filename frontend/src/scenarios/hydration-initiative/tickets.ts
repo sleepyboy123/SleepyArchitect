@@ -12,6 +12,7 @@ export const tickets: Ticket[] = [
     validate(nodes, edges) {
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       if (kdsNodes.length === 0) return false
+      if (!kdsNodes.some(n => n.parentId === 'public-subnet')) return false
       return kdsNodes.some(kds => isReachableFromIgw(nodes, edges, kds.id))
     },
     objectives: [
@@ -36,6 +37,8 @@ export const tickets: Ticket[] = [
       const kdsNodes = getNodesOfType(nodes, 'kinesis-data-streams')
       const lambdas = getNodesOfType(nodes, 'lambda-processor')
       if (kdsNodes.length === 0 || lambdas.length === 0) return false
+      if (!kdsNodes.some(n => n.parentId === 'public-subnet')) return false
+      if (!lambdas.some(n => n.parentId === 'private-subnet')) return false
       if (!kdsNodes.some(kds => isReachableFromIgw(nodes, edges, kds.id))) return false
       return kdsNodes.some(kds => lambdas.some(l => hasEdgeBetween(edges, kds.id, l.id)))
     },
@@ -64,6 +67,9 @@ export const tickets: Ticket[] = [
       const lambdas = getNodesOfType(nodes, 'lambda-processor')
       const dynamos = getNodesOfType(nodes, 'dynamodb')
       if (kdsNodes.length === 0 || lambdas.length === 0 || dynamos.length === 0) return false
+      if (!kdsNodes.some(n => n.parentId === 'public-subnet')) return false
+      if (!lambdas.some(n => n.parentId === 'private-subnet')) return false
+      if (!dynamos.some(n => n.parentId === 'private-subnet')) return false
       if (!kdsNodes.some(kds => isReachableFromIgw(nodes, edges, kds.id))) return false
       if (!kdsNodes.some(kds => lambdas.some(l => hasEdgeBetween(edges, kds.id, l.id)))) return false
       return lambdas.some(l => dynamos.some(db => hasEdgeBetween(edges, l.id, db.id)))
@@ -95,10 +101,14 @@ export const tickets: Ticket[] = [
       const firehoses = getNodesOfType(nodes, 'kinesis-firehose')
       const s3Nodes = getNodesOfType(nodes, 's3')
       if (kdsNodes.length === 0 || lambdas.length === 0 || dynamos.length === 0 || firehoses.length === 0 || s3Nodes.length === 0) return false
+      if (!kdsNodes.some(n => n.parentId === 'public-subnet')) return false
+      if (!lambdas.some(n => n.parentId === 'private-subnet')) return false
+      if (!dynamos.some(n => n.parentId === 'private-subnet')) return false
+      if (!firehoses.some(n => n.parentId === 'private-subnet')) return false
+      if (!s3Nodes.some(n => n.parentId === 'private-subnet')) return false
       if (!kdsNodes.some(kds => isReachableFromIgw(nodes, edges, kds.id))) return false
       if (!kdsNodes.some(kds => lambdas.some(l => hasEdgeBetween(edges, kds.id, l.id)))) return false
       if (!lambdas.some(l => dynamos.some(db => hasEdgeBetween(edges, l.id, db.id)))) return false
-      // Firehose must connect from KDS directly — no lambda-to-firehose edge allowed
       if (!kdsNodes.some(kds => firehoses.some(fh => hasEdgeBetween(edges, kds.id, fh.id)))) return false
       if (lambdas.some(l => firehoses.some(fh => hasEdgeBetween(edges, l.id, fh.id)))) return false
       return firehoses.some(fh => s3Nodes.some(s3 => hasEdgeBetween(edges, fh.id, s3.id)))
@@ -144,13 +154,18 @@ export const tickets: Ticket[] = [
       const cwNodes = getNodesOfType(nodes, 'cloudwatch')
       if (kdsNodes.length === 0 || lambdas.length === 0 || dynamos.length === 0 ||
           firehoses.length === 0 || s3Nodes.length === 0 || cwNodes.length === 0) return false
+      if (!kdsNodes.some(n => n.parentId === 'public-subnet')) return false
+      if (!lambdas.some(n => n.parentId === 'private-subnet')) return false
+      if (!dynamos.some(n => n.parentId === 'private-subnet')) return false
+      if (!firehoses.some(n => n.parentId === 'private-subnet')) return false
+      if (!s3Nodes.some(n => n.parentId === 'private-subnet')) return false
+      if (!cwNodes.some(n => n.parentId === 'private-subnet')) return false
       if (!kdsNodes.some(kds => isReachableFromIgw(nodes, edges, kds.id))) return false
       if (!kdsNodes.some(kds => lambdas.some(l => hasEdgeBetween(edges, kds.id, l.id)))) return false
       if (!lambdas.some(l => dynamos.some(db => hasEdgeBetween(edges, l.id, db.id)))) return false
       if (!kdsNodes.some(kds => firehoses.some(fh => hasEdgeBetween(edges, kds.id, fh.id)))) return false
       if (lambdas.some(l => firehoses.some(fh => hasEdgeBetween(edges, l.id, fh.id)))) return false
       if (!firehoses.some(fh => s3Nodes.some(s3 => hasEdgeBetween(edges, fh.id, s3.id)))) return false
-      // Only KDS → CloudWatch required to pass; Lambda → CloudWatch is a bonus objective
       return kdsNodes.some(kds => cwNodes.some(cw => hasEdgeBetween(edges, kds.id, cw.id)))
     },
     objectives: [
